@@ -255,15 +255,20 @@ function Index() {
               ✝️ Sou catequista — criar conta
             </Link>
 
-            <a
-              href="#entrar"
-              className="inline-flex h-12 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] px-6 text-[13px] font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
-            >
-              Já tenho conta — Entrar
-              <svg viewBox="0 0 24 24" className="ml-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </a>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <Link
+                to="/aluno"
+                className="inline-flex h-12 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] px-4 text-[12px] font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
+              >
+                Entrar como aluno →
+              </Link>
+              <Link
+                to="/painel"
+                className="inline-flex h-12 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] px-4 text-[12px] font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
+              >
+                Entrar como catequista →
+              </Link>
+            </div>
           </div>
 
           {/* Pillar trio — game tiles */}
