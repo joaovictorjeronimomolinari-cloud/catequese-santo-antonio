@@ -30,62 +30,58 @@ type Etapa = {
   nome: string;
   faixa: string;
   descricao: string;
-  emoji: string;
+  emoji: React.ReactNode;
   cor: "gold" | "leaf" | "habit" | "sky";
   duracao: string;
-  encontros: string;
 };
+
+function HostIcon({ className = "h-6 w-6" }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 32 32" className={className} aria-hidden>
+      <defs>
+        <radialGradient id="hostGrad" cx="35%" cy="35%" r="70%">
+          <stop offset="0%" stopColor="#FFF8E1" />
+          <stop offset="60%" stopColor="#F4E5B2" />
+          <stop offset="100%" stopColor="#D9B65A" />
+        </radialGradient>
+      </defs>
+      <circle cx="16" cy="16" r="13" fill="url(#hostGrad)" stroke="#8A6A1F" strokeWidth="1.2" />
+      <circle cx="16" cy="16" r="10.5" fill="none" stroke="#8A6A1F" strokeOpacity="0.35" strokeWidth="0.8" />
+      <g stroke="#5B3F12" strokeWidth="1.6" strokeLinecap="round">
+        <path d="M16 9.5v13" />
+        <path d="M9.5 16h13" />
+      </g>
+    </svg>
+  );
+}
 
 const ETAPAS: Etapa[] = [
   {
-    id: "infancia-1",
-    nome: "Infância I",
-    faixa: "6 a 7 anos",
+    id: "pre-catequese",
+    nome: "Pré-catequese",
+    faixa: "7 a 9 anos",
     descricao: "Primeiros passos na fé — orações, sinais e a alegria de ser filho de Deus.",
     emoji: "🧒",
     cor: "sky",
     duracao: "1 ano",
-    encontros: "Sábados · 14h",
   },
   {
-    id: "infancia-2",
-    nome: "Infância II",
-    faixa: "8 a 9 anos",
-    descricao: "Conhecer Jesus pelos Evangelhos e a vida em comunidade.",
-    emoji: "👧",
-    cor: "leaf",
-    duracao: "1 ano",
-    encontros: "Sábados · 14h",
-  },
-  {
-    id: "eucaristia",
-    nome: "Eucaristia",
-    faixa: "10 a 11 anos",
-    descricao: "Preparação para a Primeira Comunhão — o Pão da Vida.",
-    emoji: "🍞",
+    id: "primeira-comunhao",
+    nome: "Primeira Comunhão",
+    faixa: "10 a 13 anos",
+    descricao: "Preparação para receber o Pão da Vida — o Corpo e Sangue de Cristo.",
+    emoji: <HostIcon className="h-7 w-7" />,
     cor: "gold",
-    duracao: "2 anos",
-    encontros: "Sábados · 15h30",
+    duracao: "1 ano",
   },
   {
     id: "crisma",
     nome: "Crisma",
-    faixa: "13 a 16 anos",
+    faixa: "14 a 17 anos",
     descricao: "Selo do Espírito Santo — discernimento, missão e serviço.",
     emoji: "🕊️",
     cor: "habit",
-    duracao: "2 anos",
-    encontros: "Sextas · 19h30",
-  },
-  {
-    id: "adultos",
-    nome: "Catequese de Adultos",
-    faixa: "17 anos ou mais",
-    descricao: "Iniciação cristã para jovens e adultos (RICA).",
-    emoji: "🧑‍🦳",
-    cor: "habit",
-    duracao: "2 anos",
-    encontros: "Quartas · 20h",
+    duracao: "1 ano",
   },
 ];
 
@@ -116,6 +112,7 @@ function MatriculaPage() {
   // Sacramentos
   const [batizado, setBatizado] = useState<"sim" | "nao" | "">("");
   const [batismoParoquia, setBatismoParoquia] = useState("");
+  const [paroquiaDesconhecida, setParoquiaDesconhecida] = useState(false);
   const [batismoData, setBatismoData] = useState("");
   const [eucaristia, setEucaristia] = useState<boolean>(false);
   const [crisma, setCrisma] = useState<boolean>(false);
@@ -135,7 +132,10 @@ function MatriculaPage() {
   const canNext: Record<number, boolean> = {
     1: !!etapaId,
     2: nome.trim().length > 2 && !!nascimento && !!sexo,
-    3: batizado !== "" && (batizado === "nao" || (batismoParoquia.trim() !== "" && batismoData !== "")),
+    3:
+      batizado !== "" &&
+      (batizado === "nao" ||
+        ((paroquiaDesconhecida || batismoParoquia.trim() !== "") && batismoData !== "")),
     4:
       responsavel.trim() !== "" &&
       parentesco.trim() !== "" &&
@@ -411,14 +411,27 @@ function MatriculaPage() {
 
               {batizado === "sim" && (
                 <div className="grid gap-4 rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-4 sm:grid-cols-2">
-                  <Field label="Paróquia do batismo" required>
+                  <Field label="Paróquia do batismo" required={!paroquiaDesconhecida}>
                     <input
                       type="text"
                       value={batismoParoquia}
                       onChange={(e) => setBatismoParoquia(e.target.value)}
                       placeholder="Ex.: Paróquia Santo Antônio"
-                      className={inputCls}
+                      disabled={paroquiaDesconhecida}
+                      className={inputCls + (paroquiaDesconhecida ? " opacity-50" : "")}
                     />
+                    <label className="mt-2 flex items-center gap-2 text-[12px] font-bold text-[color:var(--habit-deep)]">
+                      <input
+                        type="checkbox"
+                        checked={paroquiaDesconhecida}
+                        onChange={(e) => {
+                          setParoquiaDesconhecida(e.target.checked);
+                          if (e.target.checked) setBatismoParoquia("");
+                        }}
+                        className="h-4 w-4 accent-[color:var(--habit)]"
+                      />
+                      Não sei informar a paróquia
+                    </label>
                   </Field>
                   <Field label="Data do batismo" required>
                     <input
@@ -560,7 +573,7 @@ function MatriculaPage() {
                       {etapa?.nome}
                     </p>
                     <p className="text-[11px] font-bold text-[color:var(--muted-foreground)]">
-                      {etapa?.faixa} · {etapa?.encontros}
+                      {etapa?.faixa} · {etapa?.duracao}
                     </p>
                   </div>
                 </div>
@@ -576,7 +589,7 @@ function MatriculaPage() {
                 <ReviewRow k="Batizado" v={batizado === "sim" ? "Sim" : "Ainda não"} />
                 {batizado === "sim" && (
                   <>
-                    <ReviewRow k="Paróquia" v={batismoParoquia} />
+                    <ReviewRow k="Paróquia" v={paroquiaDesconhecida ? "Não informada" : batismoParoquia} />
                     <ReviewRow k="Data" v={batismoData} />
                   </>
                 )}
@@ -620,7 +633,7 @@ function MatriculaPage() {
 
               <div className="mt-6 grid w-full gap-3 sm:grid-cols-3">
                 <Stat k="Etapa" v={etapa?.nome ?? "—"} />
-                <Stat k="Encontros" v={etapa?.encontros ?? "—"} />
+                <Stat k="Duração" v={etapa?.duracao ?? "—"} />
                 <Stat k="Início" v="Próximo sábado" />
               </div>
 
