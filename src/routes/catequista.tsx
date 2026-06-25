@@ -527,17 +527,16 @@ function CatequistaPage() {
                   className="mt-0.5 h-5 w-5 accent-[color:var(--habit)]"
                 />
                 <span>
-                  Comprometo‑me com a missão de catequista da{" "}
-                  <strong>Paróquia Santo Antônio</strong>, sob orientação do pároco e da coordenação,
-                  zelando pelo cuidado e proteção das crianças (LGPD).
+                  Sou catequista em atividade na{" "}
+                  <strong>Paróquia Santo Antônio</strong> e confirmo que os dados informados são
+                  verdadeiros, zelando pelo cuidado e proteção das crianças (LGPD).
                 </span>
               </label>
 
               {comunidadeSel && (
                 <div className="rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-3 text-[12px] font-bold text-[color:var(--habit-deep)]">
                   Sua conta ficará vinculada à comunidade{" "}
-                  <span className="font-black">{comunidadeSel.emoji} {comunidadeSel.nome}</span> e
-                  passará pela aprovação da coordenação antes de ser ativada.
+                  <span className="font-black">{comunidadeSel.emoji} {comunidadeSel.nome}</span>.
                 </div>
               )}
             </div>
@@ -558,15 +557,14 @@ function CatequistaPage() {
                 Conta criada!
               </h2>
               <p className="mt-2 max-w-md text-[14px] font-semibold text-[color:var(--muted-foreground)]">
-                Pedido enviado para a coordenação de catequese da{" "}
-                <strong>Paróquia Santo Antônio</strong>. Você receberá um e‑mail assim que o acesso
-                for liberado. Deus abençoe sua missão!
+                Sua conta de catequista da <strong>Paróquia Santo Antônio</strong> está pronta.
+                Já pode entrar e acompanhar a sua turma. Deus abençoe sua missão!
               </p>
 
               <div className="mt-6 grid w-full gap-3 sm:grid-cols-3">
                 <Stat k="Comunidade" v={comunidadeSel?.nome ?? "—"} />
                 <Stat k="Etapas" v={etapas.length ? String(etapas.length) : "—"} />
-                <Stat k="Status" v="Aguardando" />
+                <Stat k="Status" v="Conta ativa" />
               </div>
 
               <div className="mt-7 flex w-full flex-col gap-3 sm:flex-row">
