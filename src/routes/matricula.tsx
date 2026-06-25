@@ -105,8 +105,6 @@ function MatriculaPage() {
   const [nome, setNome] = useState("");
   const [nascimento, setNascimento] = useState("");
   const [sexo, setSexo] = useState<"F" | "M" | "">("");
-  const [escola, setEscola] = useState("");
-  const [serie, setSerie] = useState("");
   const [observacoes, setObservacoes] = useState("");
 
   // Sacramentos
@@ -302,7 +300,7 @@ function MatriculaPage() {
             <SectionHeading
               kicker="Passo 2"
               title="Quem é o catequizando?"
-              subtitle="Conte‑nos como ele(a) é conhecido(a) e onde estuda."
+              subtitle="Conte‑nos como ele(a) é conhecido(a)."
             />
             <div className="mt-5 grid gap-4">
               <Field label="Nome completo" required>
@@ -341,26 +339,6 @@ function MatriculaPage() {
                       </button>
                     ))}
                   </div>
-                </Field>
-              </div>
-              <div className="grid gap-4 sm:grid-cols-[1fr_140px]">
-                <Field label="Escola">
-                  <input
-                    type="text"
-                    value={escola}
-                    onChange={(e) => setEscola(e.target.value)}
-                    placeholder="Nome da escola"
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Série / Ano">
-                  <input
-                    type="text"
-                    value={serie}
-                    onChange={(e) => setSerie(e.target.value)}
-                    placeholder="Ex.: 4º ano"
-                    className={inputCls}
-                  />
                 </Field>
               </div>
               <Field
@@ -581,8 +559,6 @@ function MatriculaPage() {
                 <ReviewRow k="Nome" v={nome} />
                 <ReviewRow k="Nascimento" v={nascimento} />
                 <ReviewRow k="Sexo" v={sexo === "F" ? "Feminino" : sexo === "M" ? "Masculino" : "—"} />
-                <ReviewRow k="Escola" v={escola || "—"} />
-                <ReviewRow k="Série" v={serie || "—"} />
               </ReviewBlock>
               <ReviewBlock title="Sacramentos" onEdit={() => setStep(3)}>
                 <ReviewRow k="Batizado" v={batizado === "sim" ? "Sim" : "Ainda não"} />
