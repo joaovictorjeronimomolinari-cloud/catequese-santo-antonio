@@ -10,11 +10,17 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as MatriculaRouteImport } from './routes/matricula'
+import { Route as CatequistaRouteImport } from './routes/catequista'
 import { Route as IndexRouteImport } from './routes/index'
 
 const MatriculaRoute = MatriculaRouteImport.update({
   id: '/matricula',
   path: '/matricula',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CatequistaRoute = CatequistaRouteImport.update({
+  id: '/catequista',
+  path: '/catequista',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -25,27 +31,31 @@ const IndexRoute = IndexRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/catequista': typeof CatequistaRoute
   '/matricula': typeof MatriculaRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/catequista': typeof CatequistaRoute
   '/matricula': typeof MatriculaRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/catequista': typeof CatequistaRoute
   '/matricula': typeof MatriculaRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/matricula'
+  fullPaths: '/' | '/catequista' | '/matricula'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/matricula'
-  id: '__root__' | '/' | '/matricula'
+  to: '/' | '/catequista' | '/matricula'
+  id: '__root__' | '/' | '/catequista' | '/matricula'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CatequistaRoute: typeof CatequistaRoute
   MatriculaRoute: typeof MatriculaRoute
 }
 
@@ -56,6 +66,13 @@ declare module '@tanstack/react-router' {
       path: '/matricula'
       fullPath: '/matricula'
       preLoaderRoute: typeof MatriculaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/catequista': {
+      id: '/catequista'
+      path: '/catequista'
+      fullPath: '/catequista'
+      preLoaderRoute: typeof CatequistaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -70,6 +87,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CatequistaRoute: CatequistaRoute,
   MatriculaRoute: MatriculaRoute,
 }
 export const routeTree = rootRouteImport
