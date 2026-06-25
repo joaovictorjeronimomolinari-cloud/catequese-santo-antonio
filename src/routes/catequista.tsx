@@ -23,19 +23,20 @@ export const Route = createFileRoute("/catequista")({
 
 type Comunidade = { id: string; nome: string; emoji: string };
 const COMUNIDADES: Comunidade[] = [
-  { id: "matriz", nome: "Matriz Santo Antônio", emoji: "⛪" },
-  { id: "nsra-aparecida", nome: "N. Sra. Aparecida", emoji: "🌹" },
-  { id: "sao-jose", nome: "São José Operário", emoji: "🛠️" },
-  { id: "sao-sebastiao", nome: "São Sebastião", emoji: "🏹" },
-  { id: "espirito-santo", nome: "Divino Espírito Santo", emoji: "🕊️" },
+  { id: "matriz", nome: "Igreja Matriz", emoji: "⛪" },
+  { id: "santuario", nome: "Santuário", emoji: "🕯️" },
+  { id: "santa-rita", nome: "Santa Rita de Cássia", emoji: "🌹" },
+  { id: "guadalupe", nome: "N. Sra. de Guadalupe", emoji: "🌺" },
+  { id: "sao-benedito", nome: "São Benedito", emoji: "🙏" },
+  { id: "sagrada-familia", nome: "Sagrada Família", emoji: "👨‍👩‍👧" },
+  { id: "sao-francisco", nome: "São Francisco de Assis", emoji: "🕊️" },
+  { id: "sao-judas", nome: "São Judas Tadeu", emoji: "✨" },
 ];
 
 const ETAPAS_CATEQ = [
-  { id: "infancia-1", nome: "Infância I", emoji: "🧒" },
-  { id: "infancia-2", nome: "Infância II", emoji: "👧" },
-  { id: "eucaristia", nome: "Eucaristia", emoji: "🍞" },
-  { id: "crisma", nome: "Crisma", emoji: "🕊️" },
-  { id: "adultos", nome: "Adultos (RICA)", emoji: "🧑‍🦳" },
+  { id: "pre-catequese", nome: "Pré-catequese · 7 a 9 anos", emoji: "🧒" },
+  { id: "primeira-comunhao", nome: "Primeira Comunhão · 10 a 13 anos", emoji: "🤍" },
+  { id: "crisma", nome: "Crisma · 14 a 17 anos", emoji: "🕊️" },
 ];
 
 const STEPS = [
@@ -54,7 +55,6 @@ function CatequistaPage() {
   const [nome, setNome] = useState("");
   const [apelido, setApelido] = useState("");
   const [nascimento, setNascimento] = useState("");
-  const [estadoCivil, setEstadoCivil] = useState("");
   const [foto, setFoto] = useState<string | null>(null);
 
   // 2 - contato
@@ -73,10 +73,7 @@ function CatequistaPage() {
   const [sacBatismo, setSacBatismo] = useState(true);
   const [sacEucaristia, setSacEucaristia] = useState(true);
   const [sacCrisma, setSacCrisma] = useState(true);
-  const [sacMatrimonio, setSacMatrimonio] = useState(false);
-  const [cursoCatequetico, setCursoCatequetico] = useState<"" | "basico" | "intermediario" | "avancado">("");
   const [biblia, setBiblia] = useState(false);
-  const [carismas, setCarismas] = useState("");
 
   // 5 - credenciais
   const [senha, setSenha] = useState("");
@@ -99,10 +96,10 @@ function CatequistaPage() {
   }, [senha]);
 
   const canNext: Record<number, boolean> = {
-    1: nome.trim().length > 2 && !!nascimento && !!estadoCivil,
+    1: nome.trim().length > 2 && !!nascimento,
     2: email.includes("@") && telefone.trim() !== "" && endereco.trim() !== "" && bairro.trim() !== "",
     3: !!comunidade && etapas.length > 0 && diasDisponiveis.length > 0,
-    4: !!cursoCatequetico,
+    4: true,
     5: senha.length >= 6 && senha === senha2 && aceite,
   };
 
@@ -260,40 +257,14 @@ function CatequistaPage() {
                   className={inputCls}
                 />
               </Field>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Data de nascimento" required>
-                  <input
-                    type="date"
-                    value={nascimento}
-                    onChange={(e) => setNascimento(e.target.value)}
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Estado civil" required>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { v: "solteiro", l: "Solteiro(a)" },
-                      { v: "casado", l: "Casado(a)" },
-                      { v: "viuvo", l: "Viúvo(a)" },
-                      { v: "religioso", l: "Religioso(a)" },
-                    ].map((o) => (
-                      <button
-                        key={o.v}
-                        type="button"
-                        onClick={() => setEstadoCivil(o.v)}
-                        className={
-                          "h-11 rounded-xl border-[3px] text-[12px] font-black uppercase tracking-wider shadow-pop transition hover:-translate-y-0.5 " +
-                          (estadoCivil === o.v
-                            ? "border-[color:var(--habit-deep)] bg-gradient-gold text-[color:var(--habit-deep)]"
-                            : "border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-[color:var(--habit-deep)]")
-                        }
-                      >
-                        {o.l}
-                      </button>
-                    ))}
-                  </div>
-                </Field>
-              </div>
+              <Field label="Data de nascimento" required>
+                <input
+                  type="date"
+                  value={nascimento}
+                  onChange={(e) => setNascimento(e.target.value)}
+                  className={inputCls}
+                />
+              </Field>
             </div>
           </Card>
         )}
