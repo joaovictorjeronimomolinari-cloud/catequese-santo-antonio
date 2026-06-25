@@ -23,19 +23,20 @@ export const Route = createFileRoute("/catequista")({
 
 type Comunidade = { id: string; nome: string; emoji: string };
 const COMUNIDADES: Comunidade[] = [
-  { id: "matriz", nome: "Matriz Santo Antônio", emoji: "⛪" },
-  { id: "nsra-aparecida", nome: "N. Sra. Aparecida", emoji: "🌹" },
-  { id: "sao-jose", nome: "São José Operário", emoji: "🛠️" },
-  { id: "sao-sebastiao", nome: "São Sebastião", emoji: "🏹" },
-  { id: "espirito-santo", nome: "Divino Espírito Santo", emoji: "🕊️" },
+  { id: "matriz", nome: "Igreja Matriz", emoji: "⛪" },
+  { id: "santuario", nome: "Santuário", emoji: "🕯️" },
+  { id: "santa-rita", nome: "Santa Rita de Cássia", emoji: "🌹" },
+  { id: "guadalupe", nome: "N. Sra. de Guadalupe", emoji: "🌺" },
+  { id: "sao-benedito", nome: "São Benedito", emoji: "🙏" },
+  { id: "sagrada-familia", nome: "Sagrada Família", emoji: "👨‍👩‍👧" },
+  { id: "sao-francisco", nome: "São Francisco de Assis", emoji: "🕊️" },
+  { id: "sao-judas", nome: "São Judas Tadeu", emoji: "✨" },
 ];
 
 const ETAPAS_CATEQ = [
-  { id: "infancia-1", nome: "Infância I", emoji: "🧒" },
-  { id: "infancia-2", nome: "Infância II", emoji: "👧" },
-  { id: "eucaristia", nome: "Eucaristia", emoji: "🍞" },
-  { id: "crisma", nome: "Crisma", emoji: "🕊️" },
-  { id: "adultos", nome: "Adultos (RICA)", emoji: "🧑‍🦳" },
+  { id: "pre-catequese", nome: "Pré-catequese · 7 a 9 anos", emoji: "🧒" },
+  { id: "primeira-comunhao", nome: "Primeira Comunhão · 10 a 13 anos", emoji: "🤍" },
+  { id: "crisma", nome: "Crisma · 14 a 17 anos", emoji: "🕊️" },
 ];
 
 const STEPS = [
@@ -54,7 +55,6 @@ function CatequistaPage() {
   const [nome, setNome] = useState("");
   const [apelido, setApelido] = useState("");
   const [nascimento, setNascimento] = useState("");
-  const [estadoCivil, setEstadoCivil] = useState("");
   const [foto, setFoto] = useState<string | null>(null);
 
   // 2 - contato
@@ -73,10 +73,7 @@ function CatequistaPage() {
   const [sacBatismo, setSacBatismo] = useState(true);
   const [sacEucaristia, setSacEucaristia] = useState(true);
   const [sacCrisma, setSacCrisma] = useState(true);
-  const [sacMatrimonio, setSacMatrimonio] = useState(false);
-  const [cursoCatequetico, setCursoCatequetico] = useState<"" | "basico" | "intermediario" | "avancado">("");
   const [biblia, setBiblia] = useState(false);
-  const [carismas, setCarismas] = useState("");
 
   // 5 - credenciais
   const [senha, setSenha] = useState("");
@@ -99,10 +96,10 @@ function CatequistaPage() {
   }, [senha]);
 
   const canNext: Record<number, boolean> = {
-    1: nome.trim().length > 2 && !!nascimento && !!estadoCivil,
+    1: nome.trim().length > 2 && !!nascimento,
     2: email.includes("@") && telefone.trim() !== "" && endereco.trim() !== "" && bairro.trim() !== "",
     3: !!comunidade && etapas.length > 0 && diasDisponiveis.length > 0,
-    4: !!cursoCatequetico,
+    4: true,
     5: senha.length >= 6 && senha === senha2 && aceite,
   };
 
@@ -260,40 +257,14 @@ function CatequistaPage() {
                   className={inputCls}
                 />
               </Field>
-              <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Data de nascimento" required>
-                  <input
-                    type="date"
-                    value={nascimento}
-                    onChange={(e) => setNascimento(e.target.value)}
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Estado civil" required>
-                  <div className="grid grid-cols-2 gap-2">
-                    {[
-                      { v: "solteiro", l: "Solteiro(a)" },
-                      { v: "casado", l: "Casado(a)" },
-                      { v: "viuvo", l: "Viúvo(a)" },
-                      { v: "religioso", l: "Religioso(a)" },
-                    ].map((o) => (
-                      <button
-                        key={o.v}
-                        type="button"
-                        onClick={() => setEstadoCivil(o.v)}
-                        className={
-                          "h-11 rounded-xl border-[3px] text-[12px] font-black uppercase tracking-wider shadow-pop transition hover:-translate-y-0.5 " +
-                          (estadoCivil === o.v
-                            ? "border-[color:var(--habit-deep)] bg-gradient-gold text-[color:var(--habit-deep)]"
-                            : "border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-[color:var(--habit-deep)]")
-                        }
-                      >
-                        {o.l}
-                      </button>
-                    ))}
-                  </div>
-                </Field>
-              </div>
+              <Field label="Data de nascimento" required>
+                <input
+                  type="date"
+                  value={nascimento}
+                  onChange={(e) => setNascimento(e.target.value)}
+                  className={inputCls}
+                />
+              </Field>
             </div>
           </Card>
         )}
@@ -471,35 +442,6 @@ function CatequistaPage() {
                   <Toggle checked={sacBatismo} onChange={setSacBatismo} label="Batismo" emoji="💧" />
                   <Toggle checked={sacEucaristia} onChange={setSacEucaristia} label="Eucaristia" emoji="🍞" />
                   <Toggle checked={sacCrisma} onChange={setSacCrisma} label="Crisma" emoji="🕊️" />
-                  <Toggle checked={sacMatrimonio} onChange={setSacMatrimonio} label="Matrimônio" emoji="💍" />
-                </div>
-              </Field>
-
-              <Field label="Curso catequético" required>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {[
-                    { v: "basico", l: "Básico", d: "Iniciante" },
-                    { v: "intermediario", l: "Intermediário", d: "Diocesano" },
-                    { v: "avancado", l: "Avançado", d: "Teologia" },
-                  ].map((o) => {
-                    const sel = cursoCatequetico === o.v;
-                    return (
-                      <button
-                        key={o.v}
-                        type="button"
-                        onClick={() => setCursoCatequetico(o.v as typeof cursoCatequetico)}
-                        className={
-                          "rounded-2xl border-[3px] p-3 text-left shadow-pop transition hover:-translate-y-0.5 " +
-                          (sel
-                            ? "border-[color:var(--habit-deep)] bg-gradient-gold text-[color:var(--habit-deep)]"
-                            : "border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-[color:var(--habit-deep)]")
-                        }
-                      >
-                        <p className="font-display text-base font-extrabold">{o.l}</p>
-                        <p className="text-[10px] font-black uppercase tracking-wider opacity-80">{o.d}</p>
-                      </button>
-                    );
-                  })}
                 </div>
               </Field>
 
@@ -509,16 +451,6 @@ function CatequistaPage() {
                 label="Tenho formação bíblica"
                 emoji="📖"
               />
-
-              <Field label="Dons e carismas que gostaria de oferecer" hint="Música, teatro, artes, cozinha...">
-                <textarea
-                  rows={3}
-                  value={carismas}
-                  onChange={(e) => setCarismas(e.target.value)}
-                  placeholder="Conte um pouco sobre os talentos que pode colocar a serviço."
-                  className={inputCls + " resize-none leading-snug"}
-                />
-              </Field>
             </div>
           </Card>
         )}
@@ -595,17 +527,16 @@ function CatequistaPage() {
                   className="mt-0.5 h-5 w-5 accent-[color:var(--habit)]"
                 />
                 <span>
-                  Comprometo‑me com a missão de catequista da{" "}
-                  <strong>Paróquia Santo Antônio</strong>, sob orientação do pároco e da coordenação,
-                  zelando pelo cuidado e proteção das crianças (LGPD).
+                  Sou catequista em atividade na{" "}
+                  <strong>Paróquia Santo Antônio</strong> e confirmo que os dados informados são
+                  verdadeiros, zelando pelo cuidado e proteção das crianças (LGPD).
                 </span>
               </label>
 
               {comunidadeSel && (
                 <div className="rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-3 text-[12px] font-bold text-[color:var(--habit-deep)]">
                   Sua conta ficará vinculada à comunidade{" "}
-                  <span className="font-black">{comunidadeSel.emoji} {comunidadeSel.nome}</span> e
-                  passará pela aprovação da coordenação antes de ser ativada.
+                  <span className="font-black">{comunidadeSel.emoji} {comunidadeSel.nome}</span>.
                 </div>
               )}
             </div>
@@ -626,15 +557,14 @@ function CatequistaPage() {
                 Conta criada!
               </h2>
               <p className="mt-2 max-w-md text-[14px] font-semibold text-[color:var(--muted-foreground)]">
-                Pedido enviado para a coordenação de catequese da{" "}
-                <strong>Paróquia Santo Antônio</strong>. Você receberá um e‑mail assim que o acesso
-                for liberado. Deus abençoe sua missão!
+                Sua conta de catequista da <strong>Paróquia Santo Antônio</strong> está pronta.
+                Já pode entrar e acompanhar a sua turma. Deus abençoe sua missão!
               </p>
 
               <div className="mt-6 grid w-full gap-3 sm:grid-cols-3">
                 <Stat k="Comunidade" v={comunidadeSel?.nome ?? "—"} />
                 <Stat k="Etapas" v={etapas.length ? String(etapas.length) : "—"} />
-                <Stat k="Status" v="Aguardando" />
+                <Stat k="Status" v="Conta ativa" />
               </div>
 
               <div className="mt-7 flex w-full flex-col gap-3 sm:flex-row">
