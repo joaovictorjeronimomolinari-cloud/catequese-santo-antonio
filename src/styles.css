@@ -5,9 +5,10 @@
 @custom-variant dark (&:is(.dark *));
 
 /*
- * Catequizando Digital — Sacred Design System
- * Liturgical palette: deep marian blue, ivory parchment, sanctuary gold.
- * Typography: Cormorant Garamond (sacred display) + Inter (body).
+ * Catequizando Digital — Santo Antônio de Pádua
+ * Game-flavored sacred palette: Franciscan brown habit, lily cream,
+ * sanctuary gold cord, leaf green, sky blue. Playful, Duolingo-ish.
+ * Typography: Fraunces (warm rounded display) + Nunito (chunky body).
  */
 
 @theme inline {
@@ -51,45 +52,55 @@
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
+  --color-habit: var(--habit);
+  --color-habit-deep: var(--habit-deep);
+  --color-cord: var(--cord);
   --color-gold: var(--gold);
   --color-gold-soft: var(--gold-soft);
-  --color-parchment: var(--parchment);
-  --color-marian: var(--marian);
-  --color-marian-deep: var(--marian-deep);
+  --color-lily: var(--lily);
+  --color-cream: var(--cream);
+  --color-leaf: var(--leaf);
+  --color-sky: var(--sky);
+  --color-sky-deep: var(--sky-deep);
   --color-ink: var(--ink);
-  --font-display: "Cormorant Garamond", "Iowan Old Style", Georgia, serif;
-  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces", "Iowan Old Style", Georgia, serif;
+  --font-sans: "Nunito", ui-sans-serif, system-ui, sans-serif;
 }
 
 :root {
-  --radius: 0.75rem;
+  --radius: 1.25rem;
 
-  /* Sacred palette */
-  --parchment: oklch(0.975 0.012 85);          /* warm ivory */
-  --marian: oklch(0.38 0.09 258);              /* marian blue */
-  --marian-deep: oklch(0.24 0.07 262);         /* deep liturgical blue */
-  --gold: oklch(0.74 0.13 82);                 /* sanctuary gold */
-  --gold-soft: oklch(0.88 0.07 86);            /* candlelight */
-  --ink: oklch(0.22 0.025 260);                /* warm ink */
+  /* Santo Antônio palette */
+  --habit: oklch(0.42 0.07 55);                /* franciscan brown */
+  --habit-deep: oklch(0.30 0.06 50);           /* deep cocoa */
+  --cord: oklch(0.78 0.08 75);                 /* knotted rope */
+  --gold: oklch(0.78 0.15 80);                 /* halo gold */
+  --gold-soft: oklch(0.90 0.09 88);            /* candlelight */
+  --lily: oklch(0.985 0.012 92);               /* lily white */
+  --cream: oklch(0.965 0.03 88);               /* warm cream bg */
+  --leaf: oklch(0.70 0.13 145);                /* lily leaf green */
+  --sky: oklch(0.86 0.06 230);                 /* gentle sky */
+  --sky-deep: oklch(0.55 0.12 235);            /* franciscan sky */
+  --ink: oklch(0.28 0.03 55);                  /* warm brown ink */
 
-  --background: var(--parchment);
+  --background: var(--cream);
   --foreground: var(--ink);
-  --card: oklch(0.99 0.008 85);
+  --card: var(--lily);
   --card-foreground: var(--ink);
-  --popover: oklch(0.99 0.008 85);
+  --popover: var(--lily);
   --popover-foreground: var(--ink);
-  --primary: var(--marian-deep);
-  --primary-foreground: oklch(0.985 0.01 85);
-  --secondary: oklch(0.94 0.02 85);
-  --secondary-foreground: var(--marian-deep);
-  --muted: oklch(0.94 0.015 85);
-  --muted-foreground: oklch(0.48 0.03 260);
+  --primary: var(--habit);
+  --primary-foreground: var(--lily);
+  --secondary: oklch(0.94 0.04 88);
+  --secondary-foreground: var(--habit-deep);
+  --muted: oklch(0.93 0.025 85);
+  --muted-foreground: oklch(0.46 0.04 55);
   --accent: var(--gold);
-  --accent-foreground: oklch(0.18 0.04 260);
+  --accent-foreground: var(--habit-deep);
   --destructive: oklch(0.56 0.19 27);
-  --destructive-foreground: oklch(0.985 0.01 85);
-  --border: oklch(0.88 0.025 80);
-  --input: oklch(0.92 0.02 80);
+  --destructive-foreground: var(--lily);
+  --border: oklch(0.88 0.035 80);
+  --input: oklch(0.92 0.03 80);
   --ring: var(--gold);
 
   --chart-1: oklch(0.646 0.222 41.116);
@@ -97,40 +108,43 @@
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: var(--marian-deep);
-  --sidebar-foreground: oklch(0.985 0.01 85);
+  --sidebar: var(--habit-deep);
+  --sidebar-foreground: var(--lily);
   --sidebar-primary: var(--gold);
-  --sidebar-primary-foreground: var(--marian-deep);
-  --sidebar-accent: oklch(0.3 0.08 260);
-  --sidebar-accent-foreground: oklch(0.985 0.01 85);
-  --sidebar-border: oklch(0.3 0.06 260);
+  --sidebar-primary-foreground: var(--habit-deep);
+  --sidebar-accent: oklch(0.36 0.06 50);
+  --sidebar-accent-foreground: var(--lily);
+  --sidebar-border: oklch(0.36 0.05 50);
   --sidebar-ring: var(--gold);
 
   /* Gradients & shadows */
-  --gradient-sky: radial-gradient(ellipse at top, oklch(0.94 0.04 85 / 0.9), transparent 60%),
-                  linear-gradient(180deg, var(--parchment) 0%, oklch(0.93 0.025 80) 100%);
-  --gradient-sanctuary: linear-gradient(135deg, var(--marian-deep), var(--marian));
-  --gradient-gold: linear-gradient(135deg, oklch(0.82 0.12 85), var(--gold));
-  --shadow-sacred: 0 30px 60px -30px oklch(0.24 0.07 262 / 0.35),
-                   0 12px 24px -12px oklch(0.24 0.07 262 / 0.18);
-  --shadow-gold-glow: 0 0 40px oklch(0.82 0.14 85 / 0.45);
+  --gradient-sky: radial-gradient(ellipse at top, oklch(0.92 0.06 230 / 0.8), transparent 65%),
+                  linear-gradient(180deg, var(--cream) 0%, oklch(0.93 0.05 95) 100%);
+  --gradient-habit: linear-gradient(135deg, var(--habit-deep), var(--habit));
+  --gradient-gold: linear-gradient(135deg, oklch(0.86 0.14 88), var(--gold));
+  --gradient-leaf: linear-gradient(135deg, oklch(0.76 0.13 148), var(--leaf));
+  --shadow-pop: 0 6px 0 0 oklch(0.30 0.06 50 / 0.18),
+                0 18px 40px -18px oklch(0.30 0.06 50 / 0.35);
+  --shadow-gold-pop: 0 6px 0 0 oklch(0.55 0.12 70 / 0.55),
+                     0 14px 30px -14px oklch(0.55 0.12 70 / 0.45);
+  --shadow-gold-glow: 0 0 40px oklch(0.84 0.14 85 / 0.5);
 }
 
 .dark {
-  --background: oklch(0.18 0.04 262);
+  --background: oklch(0.20 0.04 55);
   --foreground: oklch(0.96 0.015 85);
-  --card: oklch(0.22 0.05 262);
+  --card: oklch(0.24 0.05 55);
   --card-foreground: oklch(0.96 0.015 85);
-  --popover: oklch(0.22 0.05 262);
+  --popover: oklch(0.24 0.05 55);
   --popover-foreground: oklch(0.96 0.015 85);
   --primary: var(--gold);
-  --primary-foreground: oklch(0.18 0.04 262);
-  --secondary: oklch(0.28 0.05 262);
+  --primary-foreground: oklch(0.20 0.04 55);
+  --secondary: oklch(0.30 0.05 55);
   --secondary-foreground: oklch(0.96 0.015 85);
-  --muted: oklch(0.26 0.04 262);
+  --muted: oklch(0.28 0.04 55);
   --muted-foreground: oklch(0.704 0.04 256.788);
   --accent: var(--gold);
-  --accent-foreground: oklch(0.18 0.04 262);
+  --accent-foreground: oklch(0.20 0.04 55);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
   --border: oklch(1 0 0 / 10%);
@@ -160,13 +174,15 @@
     background-color: var(--color-background);
     color: var(--color-foreground);
     font-family: var(--font-sans);
+    font-weight: 600;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
   }
 
   h1, h2, h3, h4 {
     font-family: var(--font-display);
-    letter-spacing: -0.01em;
+    letter-spacing: -0.02em;
+    font-weight: 700;
   }
 }
 
@@ -178,27 +194,35 @@
   background-image: var(--gradient-sky);
 }
 
-@utility bg-gradient-sanctuary {
-  background-image: var(--gradient-sanctuary);
+@utility bg-gradient-habit {
+  background-image: var(--gradient-habit);
 }
 
 @utility bg-gradient-gold {
   background-image: var(--gradient-gold);
 }
 
-@utility shadow-sacred {
-  box-shadow: var(--shadow-sacred);
+@utility bg-gradient-leaf {
+  background-image: var(--gradient-leaf);
+}
+
+@utility shadow-pop {
+  box-shadow: var(--shadow-pop);
+}
+
+@utility shadow-gold-pop {
+  box-shadow: var(--shadow-gold-pop);
 }
 
 @utility shadow-gold-glow {
   box-shadow: var(--shadow-gold-glow);
 }
 
-/* Subtle parchment grain overlay */
-@utility texture-parchment {
+/* Soft dotted cream texture (parchment-ish, but lighter) */
+@utility texture-cream {
   background-image:
-    radial-gradient(oklch(0.6 0.05 80 / 0.06) 1px, transparent 1px),
-    radial-gradient(oklch(0.6 0.05 80 / 0.04) 1px, transparent 1px);
+    radial-gradient(oklch(0.55 0.08 60 / 0.07) 1px, transparent 1px),
+    radial-gradient(oklch(0.55 0.08 60 / 0.05) 1px, transparent 1px);
   background-size: 22px 22px, 13px 13px;
   background-position: 0 0, 11px 11px;
 }
