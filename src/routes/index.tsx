@@ -1,4 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import mascot from "@/assets/santo-antonio-mascot.jpg";
 
@@ -236,23 +237,33 @@ function Index() {
           </p>
 
           {/* CTAs — chunky Duolingo buttons */}
-          <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:items-center">
-            <button
-              type="button"
+          <div className="mt-8 flex flex-col gap-3">
+            <Link
+              to="/matricula"
               className="group relative inline-flex h-14 items-center justify-center rounded-2xl bg-gradient-gold px-7 text-sm font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-gold-pop transition-transform duration-150 hover:-translate-y-0.5 active:translate-y-0 active:shadow-pop focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[color:var(--gold)]/50"
             >
-              <span>Fazer matrícula</span>
+              <span>🎒 Matricular catequizando</span>
               <svg viewBox="0 0 24 24" className="ml-2 h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
                 <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
-            </button>
+            </Link>
 
-            <button
-              type="button"
-              className="inline-flex h-14 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] px-6 text-sm font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[color:var(--habit)]/30"
+            <Link
+              to="/catequista"
+              className="inline-flex h-14 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)] bg-gradient-habit px-6 text-sm font-black uppercase tracking-[0.14em] text-[color:var(--lily)] shadow-pop transition-transform hover:-translate-y-0.5 active:translate-y-0 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-[color:var(--habit)]/30"
             >
-              Conheça o app
-            </button>
+              ✝️ Sou catequista — criar conta
+            </Link>
+
+            <Link
+              to="/entrar"
+              className="inline-flex h-12 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] px-6 text-[13px] font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
+            >
+              Já tenho conta — Entrar
+              <svg viewBox="0 0 24 24" className="ml-2 h-4 w-4" fill="none" stroke="currentColor" strokeWidth="3">
+                <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
+              </svg>
+            </Link>
           </div>
 
           {/* Pillar trio — game tiles */}
@@ -291,21 +302,10 @@ function Index() {
       {/* Footer */}
       <footer id="entrar" className="relative z-10 mx-auto max-w-6xl px-5 pb-10 sm:px-10">
         <FlourishDivider />
-        <div className="mt-5 flex flex-col items-center justify-between gap-3 text-center text-[11px] font-bold text-[color:var(--muted-foreground)] sm:flex-row sm:text-left">
-          <p>
-            © {new Date().getFullYear()} Paróquia Santo Antônio · Jacutinga/MG ·{" "}
-            <span className="italic">Pax et bonum</span>
-          </p>
-          <a
-            href="#"
-            className="inline-flex items-center gap-2 rounded-full border-2 border-[color:var(--habit)]/20 bg-[color:var(--card)] px-4 py-2 font-extrabold text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
-          >
-            Já tenho conta — Entrar
-            <svg viewBox="0 0 24 24" className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth="3">
-              <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
-          </a>
-        </div>
+        <p className="mt-5 text-center text-[11px] font-bold text-[color:var(--muted-foreground)]">
+          © {new Date().getFullYear()} Paróquia Santo Antônio · Jacutinga/MG ·{" "}
+          <span className="italic">Pax et bonum</span>
+        </p>
       </footer>
     </main>
   );
