@@ -206,8 +206,8 @@ function Index() {
                 <p className="text-[8px] font-extrabold uppercase tracking-widest">XP</p>
               </div>
             </div>
-            {/* Lily badge */}
-            <div className="absolute -right-3 bottom-16 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--lily)] text-[color:var(--leaf)] shadow-pop ring-4 ring-[color:var(--leaf)]/30">
+            {/* Lily badge — sits above the card, away from the verse stamp */}
+            <div className="absolute -right-3 -top-3 flex h-14 w-14 items-center justify-center rounded-full bg-[color:var(--lily)] text-[color:var(--leaf)] shadow-pop ring-4 ring-[color:var(--leaf)]/30">
               <LilyIcon className="h-7 w-7" />
             </div>
           </figure>
