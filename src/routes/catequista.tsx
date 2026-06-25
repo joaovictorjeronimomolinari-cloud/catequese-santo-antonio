@@ -442,35 +442,6 @@ function CatequistaPage() {
                   <Toggle checked={sacBatismo} onChange={setSacBatismo} label="Batismo" emoji="💧" />
                   <Toggle checked={sacEucaristia} onChange={setSacEucaristia} label="Eucaristia" emoji="🍞" />
                   <Toggle checked={sacCrisma} onChange={setSacCrisma} label="Crisma" emoji="🕊️" />
-                  <Toggle checked={sacMatrimonio} onChange={setSacMatrimonio} label="Matrimônio" emoji="💍" />
-                </div>
-              </Field>
-
-              <Field label="Curso catequético" required>
-                <div className="grid gap-2 sm:grid-cols-3">
-                  {[
-                    { v: "basico", l: "Básico", d: "Iniciante" },
-                    { v: "intermediario", l: "Intermediário", d: "Diocesano" },
-                    { v: "avancado", l: "Avançado", d: "Teologia" },
-                  ].map((o) => {
-                    const sel = cursoCatequetico === o.v;
-                    return (
-                      <button
-                        key={o.v}
-                        type="button"
-                        onClick={() => setCursoCatequetico(o.v as typeof cursoCatequetico)}
-                        className={
-                          "rounded-2xl border-[3px] p-3 text-left shadow-pop transition hover:-translate-y-0.5 " +
-                          (sel
-                            ? "border-[color:var(--habit-deep)] bg-gradient-gold text-[color:var(--habit-deep)]"
-                            : "border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-[color:var(--habit-deep)]")
-                        }
-                      >
-                        <p className="font-display text-base font-extrabold">{o.l}</p>
-                        <p className="text-[10px] font-black uppercase tracking-wider opacity-80">{o.d}</p>
-                      </button>
-                    );
-                  })}
                 </div>
               </Field>
 
@@ -480,16 +451,6 @@ function CatequistaPage() {
                 label="Tenho formação bíblica"
                 emoji="📖"
               />
-
-              <Field label="Dons e carismas que gostaria de oferecer" hint="Música, teatro, artes, cozinha...">
-                <textarea
-                  rows={3}
-                  value={carismas}
-                  onChange={(e) => setCarismas(e.target.value)}
-                  placeholder="Conte um pouco sobre os talentos que pode colocar a serviço."
-                  className={inputCls + " resize-none leading-snug"}
-                />
-              </Field>
             </div>
           </Card>
         )}
