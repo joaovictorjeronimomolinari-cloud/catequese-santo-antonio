@@ -9,10 +9,22 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as PainelRouteImport } from './routes/painel'
 import { Route as MatriculaRouteImport } from './routes/matricula'
 import { Route as CatequistaRouteImport } from './routes/catequista'
+import { Route as AlunoRouteImport } from './routes/aluno'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PainelIndexRouteImport } from './routes/painel.index'
+import { Route as AlunoIndexRouteImport } from './routes/aluno.index'
+import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
+import { Route as AlunoDevocionalRouteImport } from './routes/aluno.devocional'
+import { Route as AlunoConquistasRouteImport } from './routes/aluno.conquistas'
 
+const PainelRoute = PainelRouteImport.update({
+  id: '/painel',
+  path: '/painel',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatriculaRoute = MatriculaRouteImport.update({
   id: '/matricula',
   path: '/matricula',
@@ -23,44 +35,131 @@ const CatequistaRoute = CatequistaRouteImport.update({
   path: '/catequista',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AlunoRoute = AlunoRouteImport.update({
+  id: '/aluno',
+  path: '/aluno',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PainelIndexRoute = PainelIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => PainelRoute,
+} as any)
+const AlunoIndexRoute = AlunoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AlunoRoute,
+} as any)
+const AlunoPerfilRoute = AlunoPerfilRouteImport.update({
+  id: '/perfil',
+  path: '/perfil',
+  getParentRoute: () => AlunoRoute,
+} as any)
+const AlunoDevocionalRoute = AlunoDevocionalRouteImport.update({
+  id: '/devocional',
+  path: '/devocional',
+  getParentRoute: () => AlunoRoute,
+} as any)
+const AlunoConquistasRoute = AlunoConquistasRouteImport.update({
+  id: '/conquistas',
+  path: '/conquistas',
+  getParentRoute: () => AlunoRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/aluno': typeof AlunoRouteWithChildren
   '/catequista': typeof CatequistaRoute
   '/matricula': typeof MatriculaRoute
+  '/painel': typeof PainelRouteWithChildren
+  '/aluno/conquistas': typeof AlunoConquistasRoute
+  '/aluno/devocional': typeof AlunoDevocionalRoute
+  '/aluno/perfil': typeof AlunoPerfilRoute
+  '/aluno/': typeof AlunoIndexRoute
+  '/painel/': typeof PainelIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/catequista': typeof CatequistaRoute
   '/matricula': typeof MatriculaRoute
+  '/aluno/conquistas': typeof AlunoConquistasRoute
+  '/aluno/devocional': typeof AlunoDevocionalRoute
+  '/aluno/perfil': typeof AlunoPerfilRoute
+  '/aluno': typeof AlunoIndexRoute
+  '/painel': typeof PainelIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/aluno': typeof AlunoRouteWithChildren
   '/catequista': typeof CatequistaRoute
   '/matricula': typeof MatriculaRoute
+  '/painel': typeof PainelRouteWithChildren
+  '/aluno/conquistas': typeof AlunoConquistasRoute
+  '/aluno/devocional': typeof AlunoDevocionalRoute
+  '/aluno/perfil': typeof AlunoPerfilRoute
+  '/aluno/': typeof AlunoIndexRoute
+  '/painel/': typeof PainelIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/catequista' | '/matricula'
+  fullPaths:
+    | '/'
+    | '/aluno'
+    | '/catequista'
+    | '/matricula'
+    | '/painel'
+    | '/aluno/conquistas'
+    | '/aluno/devocional'
+    | '/aluno/perfil'
+    | '/aluno/'
+    | '/painel/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/catequista' | '/matricula'
-  id: '__root__' | '/' | '/catequista' | '/matricula'
+  to:
+    | '/'
+    | '/catequista'
+    | '/matricula'
+    | '/aluno/conquistas'
+    | '/aluno/devocional'
+    | '/aluno/perfil'
+    | '/aluno'
+    | '/painel'
+  id:
+    | '__root__'
+    | '/'
+    | '/aluno'
+    | '/catequista'
+    | '/matricula'
+    | '/painel'
+    | '/aluno/conquistas'
+    | '/aluno/devocional'
+    | '/aluno/perfil'
+    | '/aluno/'
+    | '/painel/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AlunoRoute: typeof AlunoRouteWithChildren
   CatequistaRoute: typeof CatequistaRoute
   MatriculaRoute: typeof MatriculaRoute
+  PainelRoute: typeof PainelRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/painel': {
+      id: '/painel'
+      path: '/painel'
+      fullPath: '/painel'
+      preLoaderRoute: typeof PainelRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matricula': {
       id: '/matricula'
       path: '/matricula'
@@ -75,6 +174,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CatequistaRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/aluno': {
+      id: '/aluno'
+      path: '/aluno'
+      fullPath: '/aluno'
+      preLoaderRoute: typeof AlunoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,13 +188,77 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/painel/': {
+      id: '/painel/'
+      path: '/'
+      fullPath: '/painel/'
+      preLoaderRoute: typeof PainelIndexRouteImport
+      parentRoute: typeof PainelRoute
+    }
+    '/aluno/': {
+      id: '/aluno/'
+      path: '/'
+      fullPath: '/aluno/'
+      preLoaderRoute: typeof AlunoIndexRouteImport
+      parentRoute: typeof AlunoRoute
+    }
+    '/aluno/perfil': {
+      id: '/aluno/perfil'
+      path: '/perfil'
+      fullPath: '/aluno/perfil'
+      preLoaderRoute: typeof AlunoPerfilRouteImport
+      parentRoute: typeof AlunoRoute
+    }
+    '/aluno/devocional': {
+      id: '/aluno/devocional'
+      path: '/devocional'
+      fullPath: '/aluno/devocional'
+      preLoaderRoute: typeof AlunoDevocionalRouteImport
+      parentRoute: typeof AlunoRoute
+    }
+    '/aluno/conquistas': {
+      id: '/aluno/conquistas'
+      path: '/conquistas'
+      fullPath: '/aluno/conquistas'
+      preLoaderRoute: typeof AlunoConquistasRouteImport
+      parentRoute: typeof AlunoRoute
+    }
   }
 }
 
+interface AlunoRouteChildren {
+  AlunoConquistasRoute: typeof AlunoConquistasRoute
+  AlunoDevocionalRoute: typeof AlunoDevocionalRoute
+  AlunoPerfilRoute: typeof AlunoPerfilRoute
+  AlunoIndexRoute: typeof AlunoIndexRoute
+}
+
+const AlunoRouteChildren: AlunoRouteChildren = {
+  AlunoConquistasRoute: AlunoConquistasRoute,
+  AlunoDevocionalRoute: AlunoDevocionalRoute,
+  AlunoPerfilRoute: AlunoPerfilRoute,
+  AlunoIndexRoute: AlunoIndexRoute,
+}
+
+const AlunoRouteWithChildren = AlunoRoute._addFileChildren(AlunoRouteChildren)
+
+interface PainelRouteChildren {
+  PainelIndexRoute: typeof PainelIndexRoute
+}
+
+const PainelRouteChildren: PainelRouteChildren = {
+  PainelIndexRoute: PainelIndexRoute,
+}
+
+const PainelRouteWithChildren =
+  PainelRoute._addFileChildren(PainelRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AlunoRoute: AlunoRouteWithChildren,
   CatequistaRoute: CatequistaRoute,
   MatriculaRoute: MatriculaRoute,
+  PainelRoute: PainelRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
