@@ -273,7 +273,6 @@ function MatriculaPage() {
                         </p>
                         <div className="mt-1.5 flex items-center gap-3 text-[10px] font-black uppercase tracking-wider text-[color:var(--habit)]">
                           <span>⏳ {e.duracao}</span>
-                          <span>📅 {e.encontros}</span>
                         </div>
                       </div>
                       <div
