@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { registrarAluno, type EtapaId } from "@/lib/store";
 
 export const Route = createFileRoute("/matricula")({
   head: () => ({
@@ -125,6 +126,11 @@ function MatriculaPage() {
   const [endereco, setEndereco] = useState("");
   const [bairro, setBairro] = useState("");
 
+  // Acesso do catequizando
+  const [senha, setSenha] = useState("");
+  const [senha2, setSenha2] = useState("");
+  const [aceite, setAceite] = useState(true);
+
   const etapa = useMemo(() => ETAPAS.find((e) => e.id === etapaId), [etapaId]);
 
   const canNext: Record<number, boolean> = {
@@ -140,14 +146,33 @@ function MatriculaPage() {
       telefone.trim() !== "" &&
       endereco.trim() !== "" &&
       bairro.trim() !== "",
-    5: true,
+    5: senha.length >= 4 && senha === senha2 && aceite,
   };
 
   const goNext = () => setStep((s) => (s < 6 ? ((s + 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
   const goBack = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
 
   const submit = () => {
-    // No backend yet — purely UI demo
+    if (!etapa || !aceite) return;
+    if (senha.length < 4 || senha !== senha2) return;
+    registrarAluno({
+      nome: nome.trim(),
+      senha,
+      nascimento,
+      sexo,
+      etapa: etapa.id as EtapaId,
+      responsavel,
+      telefone,
+      email,
+      endereco,
+      bairro,
+      batizado,
+      batismoParoquia: paroquiaDesconhecida ? "" : batismoParoquia,
+      batismoData,
+      eucaristia,
+      crisma,
+      observacoes,
+    });
     setStep(6);
   };
 
@@ -578,8 +603,46 @@ function MatriculaPage() {
                 <ReviewRow k="Endereço" v={`${endereco}, ${bairro}`} />
               </ReviewBlock>
 
+              <div className="mt-2 rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-4">
+                <p className="mb-3 text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--habit)]">
+                  Crie o acesso do catequizando
+                </p>
+                <p className="mb-3 text-[12px] font-semibold text-[color:var(--muted-foreground)]">
+                  Esse será o login no app — o nome do catequizando e a senha abaixo.
+                </p>
+                <div className="grid gap-3 sm:grid-cols-2">
+                  <Field label="Senha" required hint="Mínimo 4 caracteres.">
+                    <input
+                      type="password"
+                      value={senha}
+                      onChange={(e) => setSenha(e.target.value)}
+                      placeholder="••••••"
+                      className={inputCls}
+                    />
+                  </Field>
+                  <Field
+                    label="Confirme a senha"
+                    required
+                    hint={senha2 && senha !== senha2 ? "As senhas não conferem." : undefined}
+                  >
+                    <input
+                      type="password"
+                      value={senha2}
+                      onChange={(e) => setSenha2(e.target.value)}
+                      placeholder="••••••"
+                      className={inputCls}
+                    />
+                  </Field>
+                </div>
+              </div>
+
               <label className="mt-2 flex items-start gap-3 rounded-2xl border-2 border-[color:var(--habit-deep)]/10 bg-[color:var(--card)] p-3 text-[12px] font-semibold text-[color:var(--habit-deep)] shadow-pop">
-                <input type="checkbox" defaultChecked className="mt-0.5 h-5 w-5 accent-[color:var(--habit)]" />
+                <input
+                  type="checkbox"
+                  checked={aceite}
+                  onChange={(e) => setAceite(e.target.checked)}
+                  className="mt-0.5 h-5 w-5 accent-[color:var(--habit)]"
+                />
                 <span>
                   Autorizo o uso dos dados acima pela <strong>Paróquia Santo Antônio</strong> para fins
                   catequéticos e pastorais, conforme a LGPD.
@@ -602,14 +665,14 @@ function MatriculaPage() {
                 Matrícula enviada!
               </h2>
               <p className="mt-2 max-w-md text-[14px] font-semibold text-[color:var(--muted-foreground)]">
-                A secretaria da Paróquia Santo Antônio vai revisar a inscrição e entrar em contato pelo
-                WhatsApp informado. Que Santo Antônio interceda por essa caminhada!
+                A coordenação vai revisar e <strong>aprovar</strong> a matrícula. Assim que liberada,
+                <strong> {nome || "o catequizando"}</strong> poderá entrar com o nome e a senha cadastrada.
               </p>
 
               <div className="mt-6 grid w-full gap-3 sm:grid-cols-3">
                 <Stat k="Etapa" v={etapa?.nome ?? "—"} />
                 <Stat k="Duração" v={etapa?.duracao ?? "—"} />
-                <Stat k="Início" v="Próximo sábado" />
+                <Stat k="Status" v="Aguardando aprovação" />
               </div>
 
               <div className="mt-7 flex w-full flex-col gap-3 sm:flex-row">
@@ -620,10 +683,10 @@ function MatriculaPage() {
                   Voltar ao início
                 </Link>
                 <Link
-                  to="/catequista"
+                  to="/login"
                   className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl bg-gradient-habit text-sm font-black uppercase tracking-wider text-[color:var(--lily)] shadow-pop"
                 >
-                  Sou catequista
+                  Ir para o login
                 </Link>
               </div>
             </div>
@@ -659,6 +722,7 @@ function MatriculaPage() {
               <button
                 type="button"
                 onClick={submit}
+                disabled={!canNext[5]}
                 className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl bg-gradient-leaf text-sm font-black uppercase tracking-wider text-[color:var(--lily)] shadow-pop transition hover:-translate-y-0.5"
               >
                 Enviar matrícula

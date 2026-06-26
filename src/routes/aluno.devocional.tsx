@@ -1,5 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
+import { faixaDe, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/aluno/devocional")({
   head: () => ({
@@ -26,18 +27,25 @@ const PASSOS = [
 
 function DevocionalPage() {
   const [passo, setPasso] = useState(0);
+  const aluno = useStore((s) =>
+    s.session?.kind === "aluno" ? s.alunos.find((a) => a.id === s.session!.id) ?? null : null,
+  );
+  const faixa = aluno ? faixaDe(aluno.etapa) : "infantil";
+  const isJovem = faixa === "jovem";
 
   return (
     <main className="mx-auto max-w-3xl px-5 pb-10 pt-6">
       <header>
         <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[color:var(--habit)]">
-          Devocional do dia
+          {isJovem ? "Devocional do dia" : "Orações do dia"}
         </p>
         <h1 className="mt-1 font-display text-3xl font-extrabold leading-tight text-[color:var(--habit-deep)]">
-          5 minutinhos com Jesus
+          {isJovem ? "Momento com o Senhor" : "5 minutinhos com Jesus"}
         </h1>
         <p className="mt-1 text-[13px] font-semibold text-[color:var(--muted-foreground)]">
-          Reze em paz, no seu ritmo. Cada dia uma faísca a mais de fé.
+          {isJovem
+            ? "Silêncio, escuta e oração — aprofunde sua vida espiritual."
+            : "Reze em paz, no seu ritmo. Cada dia uma faísca a mais de fé."}
         </p>
       </header>
 

@@ -255,20 +255,12 @@ function Index() {
               ✝️ Sou catequista — criar conta
             </Link>
 
-            <div className="grid gap-3 sm:grid-cols-2">
-              <Link
-                to="/aluno"
-                className="inline-flex h-12 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] px-4 text-[12px] font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
-              >
-                Entrar como aluno →
-              </Link>
-              <Link
-                to="/painel"
-                className="inline-flex h-12 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] px-4 text-[12px] font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
-              >
-                Entrar como catequista →
-              </Link>
-            </div>
+            <Link
+              to="/login"
+              className="inline-flex h-12 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] px-4 text-[12px] font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
+            >
+              🔑 Já tenho conta — Entrar
+            </Link>
           </div>
 
           {/* Pillar trio — game tiles */}
