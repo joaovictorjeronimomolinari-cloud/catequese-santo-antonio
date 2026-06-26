@@ -17,6 +17,7 @@ import { Route as AprovacoesRouteImport } from './routes/aprovacoes'
 import { Route as AlunoRouteImport } from './routes/aluno'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PainelIndexRouteImport } from './routes/painel.index'
+import { Route as AlunoIndexRouteImport } from './routes/aluno.index'
 import { Route as PainelTurmaRouteImport } from './routes/painel.turma'
 import { Route as PainelPerfilRouteImport } from './routes/painel.perfil'
 import { Route as PainelAtividadesRouteImport } from './routes/painel.atividades'
@@ -64,6 +65,11 @@ const PainelIndexRoute = PainelIndexRouteImport.update({
   path: '/',
   getParentRoute: () => PainelRoute,
 } as any)
+const AlunoIndexRoute = AlunoIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AlunoRoute,
+} as any)
 const PainelTurmaRoute = PainelTurmaRouteImport.update({
   id: '/turma',
   path: '/turma',
@@ -109,11 +115,11 @@ export interface FileRoutesByFullPath {
   '/painel/atividades': typeof PainelAtividadesRoute
   '/painel/perfil': typeof PainelPerfilRoute
   '/painel/turma': typeof PainelTurmaRoute
+  '/aluno/': typeof AlunoIndexRoute
   '/painel/': typeof PainelIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/aluno': typeof AlunoRouteWithChildren
   '/aprovacoes': typeof AprovacoesRoute
   '/catequista': typeof CatequistaRoute
   '/login': typeof LoginRoute
@@ -124,6 +130,7 @@ export interface FileRoutesByTo {
   '/painel/atividades': typeof PainelAtividadesRoute
   '/painel/perfil': typeof PainelPerfilRoute
   '/painel/turma': typeof PainelTurmaRoute
+  '/aluno': typeof AlunoIndexRoute
   '/painel': typeof PainelIndexRoute
 }
 export interface FileRoutesById {
@@ -141,6 +148,7 @@ export interface FileRoutesById {
   '/painel/atividades': typeof PainelAtividadesRoute
   '/painel/perfil': typeof PainelPerfilRoute
   '/painel/turma': typeof PainelTurmaRoute
+  '/aluno/': typeof AlunoIndexRoute
   '/painel/': typeof PainelIndexRoute
 }
 export interface FileRouteTypes {
@@ -159,11 +167,11 @@ export interface FileRouteTypes {
     | '/painel/atividades'
     | '/painel/perfil'
     | '/painel/turma'
+    | '/aluno/'
     | '/painel/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
-    | '/aluno'
     | '/aprovacoes'
     | '/catequista'
     | '/login'
@@ -174,6 +182,7 @@ export interface FileRouteTypes {
     | '/painel/atividades'
     | '/painel/perfil'
     | '/painel/turma'
+    | '/aluno'
     | '/painel'
   id:
     | '__root__'
@@ -190,6 +199,7 @@ export interface FileRouteTypes {
     | '/painel/atividades'
     | '/painel/perfil'
     | '/painel/turma'
+    | '/aluno/'
     | '/painel/'
   fileRoutesById: FileRoutesById
 }
@@ -261,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelIndexRouteImport
       parentRoute: typeof PainelRoute
     }
+    '/aluno/': {
+      id: '/aluno/'
+      path: '/'
+      fullPath: '/aluno/'
+      preLoaderRoute: typeof AlunoIndexRouteImport
+      parentRoute: typeof AlunoRoute
+    }
     '/painel/turma': {
       id: '/painel/turma'
       path: '/turma'
@@ -310,12 +327,14 @@ interface AlunoRouteChildren {
   AlunoConquistasRoute: typeof AlunoConquistasRoute
   AlunoDevocionalRoute: typeof AlunoDevocionalRoute
   AlunoPerfilRoute: typeof AlunoPerfilRoute
+  AlunoIndexRoute: typeof AlunoIndexRoute
 }
 
 const AlunoRouteChildren: AlunoRouteChildren = {
   AlunoConquistasRoute: AlunoConquistasRoute,
   AlunoDevocionalRoute: AlunoDevocionalRoute,
   AlunoPerfilRoute: AlunoPerfilRoute,
+  AlunoIndexRoute: AlunoIndexRoute,
 }
 
 const AlunoRouteWithChildren = AlunoRoute._addFileChildren(AlunoRouteChildren)
