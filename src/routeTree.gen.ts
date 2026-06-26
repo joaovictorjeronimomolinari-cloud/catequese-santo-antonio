@@ -21,7 +21,6 @@ import { Route as AlunoIndexRouteImport } from './routes/aluno.index'
 import { Route as PainelTurmaRouteImport } from './routes/painel.turma'
 import { Route as PainelPerfilRouteImport } from './routes/painel.perfil'
 import { Route as PainelAtividadesRouteImport } from './routes/painel.atividades'
-import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
 import { Route as AlunoDevocionalRouteImport } from './routes/aluno.devocional'
 import { Route as AlunoConquistasRouteImport } from './routes/aluno.conquistas'
 
@@ -85,11 +84,6 @@ const PainelAtividadesRoute = PainelAtividadesRouteImport.update({
   path: '/atividades',
   getParentRoute: () => PainelRoute,
 } as any)
-const AlunoPerfilRoute = AlunoPerfilRouteImport.update({
-  id: '/perfil',
-  path: '/perfil',
-  getParentRoute: () => AlunoRoute,
-} as any)
 const AlunoDevocionalRoute = AlunoDevocionalRouteImport.update({
   id: '/devocional',
   path: '/devocional',
@@ -111,7 +105,6 @@ export interface FileRoutesByFullPath {
   '/painel': typeof PainelRouteWithChildren
   '/aluno/conquistas': typeof AlunoConquistasRoute
   '/aluno/devocional': typeof AlunoDevocionalRoute
-  '/aluno/perfil': typeof AlunoPerfilRoute
   '/painel/atividades': typeof PainelAtividadesRoute
   '/painel/perfil': typeof PainelPerfilRoute
   '/painel/turma': typeof PainelTurmaRoute
@@ -126,7 +119,6 @@ export interface FileRoutesByTo {
   '/matricula': typeof MatriculaRoute
   '/aluno/conquistas': typeof AlunoConquistasRoute
   '/aluno/devocional': typeof AlunoDevocionalRoute
-  '/aluno/perfil': typeof AlunoPerfilRoute
   '/painel/atividades': typeof PainelAtividadesRoute
   '/painel/perfil': typeof PainelPerfilRoute
   '/painel/turma': typeof PainelTurmaRoute
@@ -144,7 +136,6 @@ export interface FileRoutesById {
   '/painel': typeof PainelRouteWithChildren
   '/aluno/conquistas': typeof AlunoConquistasRoute
   '/aluno/devocional': typeof AlunoDevocionalRoute
-  '/aluno/perfil': typeof AlunoPerfilRoute
   '/painel/atividades': typeof PainelAtividadesRoute
   '/painel/perfil': typeof PainelPerfilRoute
   '/painel/turma': typeof PainelTurmaRoute
@@ -163,7 +154,6 @@ export interface FileRouteTypes {
     | '/painel'
     | '/aluno/conquistas'
     | '/aluno/devocional'
-    | '/aluno/perfil'
     | '/painel/atividades'
     | '/painel/perfil'
     | '/painel/turma'
@@ -178,7 +168,6 @@ export interface FileRouteTypes {
     | '/matricula'
     | '/aluno/conquistas'
     | '/aluno/devocional'
-    | '/aluno/perfil'
     | '/painel/atividades'
     | '/painel/perfil'
     | '/painel/turma'
@@ -195,7 +184,6 @@ export interface FileRouteTypes {
     | '/painel'
     | '/aluno/conquistas'
     | '/aluno/devocional'
-    | '/aluno/perfil'
     | '/painel/atividades'
     | '/painel/perfil'
     | '/painel/turma'
@@ -299,13 +287,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PainelAtividadesRouteImport
       parentRoute: typeof PainelRoute
     }
-    '/aluno/perfil': {
-      id: '/aluno/perfil'
-      path: '/perfil'
-      fullPath: '/aluno/perfil'
-      preLoaderRoute: typeof AlunoPerfilRouteImport
-      parentRoute: typeof AlunoRoute
-    }
     '/aluno/devocional': {
       id: '/aluno/devocional'
       path: '/devocional'
@@ -326,14 +307,12 @@ declare module '@tanstack/react-router' {
 interface AlunoRouteChildren {
   AlunoConquistasRoute: typeof AlunoConquistasRoute
   AlunoDevocionalRoute: typeof AlunoDevocionalRoute
-  AlunoPerfilRoute: typeof AlunoPerfilRoute
   AlunoIndexRoute: typeof AlunoIndexRoute
 }
 
 const AlunoRouteChildren: AlunoRouteChildren = {
   AlunoConquistasRoute: AlunoConquistasRoute,
   AlunoDevocionalRoute: AlunoDevocionalRoute,
-  AlunoPerfilRoute: AlunoPerfilRoute,
   AlunoIndexRoute: AlunoIndexRoute,
 }
 
