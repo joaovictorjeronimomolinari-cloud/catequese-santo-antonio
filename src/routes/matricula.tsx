@@ -146,7 +146,7 @@ function MatriculaPage() {
       telefone.trim() !== "" &&
       endereco.trim() !== "" &&
       bairro.trim() !== "",
-    5: true,
+    5: senha.length >= 4 && senha === senha2 && aceite,
   };
 
   const goNext = () => setStep((s) => (s < 6 ? ((s + 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
@@ -722,6 +722,7 @@ function MatriculaPage() {
               <button
                 type="button"
                 onClick={submit}
+                disabled={!canNext[5]}
                 className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl bg-gradient-leaf text-sm font-black uppercase tracking-wider text-[color:var(--lily)] shadow-pop transition hover:-translate-y-0.5"
               >
                 Enviar matrícula
