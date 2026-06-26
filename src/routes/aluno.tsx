@@ -1,4 +1,6 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { faixaDe, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/aluno")({
   head: () => ({
@@ -10,17 +12,38 @@ export const Route = createFileRoute("/aluno")({
   component: AlunoLayout,
 });
 
-type Tab = { to: "/aluno" | "/aluno/devocional" | "/aluno/conquistas" | "/aluno/perfil"; label: string; emoji: string };
-
-const TABS: Tab[] = [
-  { to: "/aluno", label: "Trilha", emoji: "🗺️" },
-  { to: "/aluno/devocional", label: "Devocional", emoji: "📖" },
-  { to: "/aluno/conquistas", label: "Conquistas", emoji: "🏆" },
-  { to: "/aluno/perfil", label: "Perfil", emoji: "🙂" },
-];
+type Tab = {
+  to: "/aluno" | "/aluno/devocional" | "/aluno/conquistas" | "/aluno/perfil";
+  label: string;
+  emoji: string;
+};
 
 function AlunoLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const session = useStore((s) => s.session);
+  const aluno = useStore((s) =>
+    s.session?.kind === "aluno" ? s.alunos.find((a) => a.id === s.session!.id) ?? null : null,
+  );
+
+  useEffect(() => {
+    if (!session || session.kind !== "aluno") navigate({ to: "/login" });
+  }, [session, navigate]);
+
+  if (!aluno) return null;
+
+  const faixa = faixaDe(aluno.etapa);
+  const TABS: Tab[] = [
+    { to: "/aluno", label: "Atividades", emoji: "🗺️" },
+    {
+      to: "/aluno/devocional",
+      label: faixa === "jovem" ? "Devocional" : "Orações",
+      emoji: faixa === "jovem" ? "📖" : "🙏",
+    },
+    { to: "/aluno/conquistas", label: "Conquistas", emoji: "🏆" },
+    { to: "/aluno/perfil", label: "Perfil", emoji: "🙂" },
+  ];
+
   return (
     <div className="relative min-h-screen bg-gradient-sky pb-24">
       <div className="pointer-events-none fixed inset-0 texture-cream opacity-60" aria-hidden />
