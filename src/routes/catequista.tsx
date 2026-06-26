@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { registrarCatequista, type EtapaId } from "@/lib/store";
 
 export const Route = createFileRoute("/catequista")({
   head: () => ({
@@ -116,7 +117,29 @@ function CatequistaPage() {
 
   const goNext = () => setStep((s) => (s < 6 ? ((s + 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
   const goBack = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
-  const submit = () => setStep(6);
+  const submit = () => {
+    if (!canNext[5]) return;
+    registrarCatequista({
+      nome: nome.trim(),
+      apelido,
+      senha,
+      nascimento,
+      email,
+      telefone,
+      endereco,
+      bairro,
+      comunidade,
+      anos,
+      etapas: etapas as EtapaId[],
+      diasDisponiveis,
+      sacBatismo,
+      sacEucaristia,
+      sacCrisma,
+      biblia,
+      foto,
+    });
+    setStep(6);
+  };
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-sky pb-32">
@@ -554,17 +577,17 @@ function CatequistaPage() {
                 </div>
               </div>
               <h2 className="font-display text-3xl font-extrabold text-[color:var(--habit-deep)]">
-                Conta criada!
+                Conta enviada!
               </h2>
               <p className="mt-2 max-w-md text-[14px] font-semibold text-[color:var(--muted-foreground)]">
-                Sua conta de catequista da <strong>Paróquia Santo Antônio</strong> está pronta.
-                Já pode entrar e acompanhar a sua turma. Deus abençoe sua missão!
+                A coordenação vai revisar e <strong>aprovar</strong> a sua conta de catequista.
+                Assim que liberada, você poderá entrar com seu nome completo e a senha cadastrada.
               </p>
 
               <div className="mt-6 grid w-full gap-3 sm:grid-cols-3">
                 <Stat k="Comunidade" v={comunidadeSel?.nome ?? "—"} />
                 <Stat k="Etapas" v={etapas.length ? String(etapas.length) : "—"} />
-                <Stat k="Status" v="Conta ativa" />
+                <Stat k="Status" v="Aguardando aprovação" />
               </div>
 
               <div className="mt-7 flex w-full flex-col gap-3 sm:flex-row">
