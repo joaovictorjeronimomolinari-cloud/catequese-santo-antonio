@@ -1,4 +1,6 @@
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
+import { useEffect } from "react";
+import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/painel")({
   head: () => ({
@@ -10,17 +12,35 @@ export const Route = createFileRoute("/painel")({
   component: PainelLayout,
 });
 
-type Tab = { to: "/painel" | "/painel/turma" | "/painel/atividades" | "/painel/perfil"; label: string; emoji: string };
-
-const TABS: Tab[] = [
-  { to: "/painel", label: "Início", emoji: "🏠" },
-  { to: "/painel/turma", label: "Turma", emoji: "👨‍👩‍👧" },
-  { to: "/painel/atividades", label: "Atividades", emoji: "📋" },
-  { to: "/painel/perfil", label: "Perfil", emoji: "🙂" },
-];
+type Tab = { to: "/painel" | "/painel/turma" | "/painel/atividades" | "/painel/perfil" | "/aprovacoes"; label: string; emoji: string };
 
 function PainelLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const navigate = useNavigate();
+  const session = useStore((s) => s.session);
+
+  useEffect(() => {
+    if (!session || (session.kind !== "catequista" && session.kind !== "admin")) {
+      navigate({ to: "/login" });
+    }
+  }, [session, navigate]);
+
+  if (!session || (session.kind !== "catequista" && session.kind !== "admin")) return null;
+
+  const isAdmin = session.kind === "admin";
+  const TABS: Tab[] = isAdmin
+    ? [
+        { to: "/painel", label: "Início", emoji: "🏠" },
+        { to: "/aprovacoes", label: "Aprovar", emoji: "✅" },
+        { to: "/painel/turma", label: "Turmas", emoji: "👨‍👩‍👧" },
+        { to: "/painel/perfil", label: "Perfil", emoji: "🙂" },
+      ]
+    : [
+        { to: "/painel", label: "Início", emoji: "🏠" },
+        { to: "/painel/turma", label: "Turma", emoji: "👨‍👩‍👧" },
+        { to: "/painel/atividades", label: "Atividades", emoji: "📋" },
+        { to: "/painel/perfil", label: "Perfil", emoji: "🙂" },
+      ];
   return (
     <div className="relative min-h-screen bg-gradient-sky pb-24">
       <div className="pointer-events-none fixed inset-0 texture-cream opacity-60" aria-hidden />
