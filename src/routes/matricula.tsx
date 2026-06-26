@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
+import { registrarAluno, type EtapaId } from "@/lib/store";
 
 export const Route = createFileRoute("/matricula")({
   head: () => ({
@@ -125,6 +126,11 @@ function MatriculaPage() {
   const [endereco, setEndereco] = useState("");
   const [bairro, setBairro] = useState("");
 
+  // Acesso do catequizando
+  const [senha, setSenha] = useState("");
+  const [senha2, setSenha2] = useState("");
+  const [aceite, setAceite] = useState(true);
+
   const etapa = useMemo(() => ETAPAS.find((e) => e.id === etapaId), [etapaId]);
 
   const canNext: Record<number, boolean> = {
@@ -147,7 +153,26 @@ function MatriculaPage() {
   const goBack = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
 
   const submit = () => {
-    // No backend yet — purely UI demo
+    if (!etapa || !aceite) return;
+    if (senha.length < 4 || senha !== senha2) return;
+    registrarAluno({
+      nome: nome.trim(),
+      senha,
+      nascimento,
+      sexo,
+      etapa: etapa.id as EtapaId,
+      responsavel,
+      telefone,
+      email,
+      endereco,
+      bairro,
+      batizado,
+      batismoParoquia: paroquiaDesconhecida ? "" : batismoParoquia,
+      batismoData,
+      eucaristia,
+      crisma,
+      observacoes,
+    });
     setStep(6);
   };
 
