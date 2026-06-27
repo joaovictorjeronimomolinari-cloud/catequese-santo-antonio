@@ -32,7 +32,7 @@ function PainelLayout() {
     ? [
         { to: "/painel", label: "Início", emoji: "🏠" },
         { to: "/aprovacoes", label: "Aprovar", emoji: "✅" },
-        { to: "/painel/turma", label: "Turmas", emoji: "👨‍👩‍👧" },
+        { to: "/painel/atividades", label: "Trilha", emoji: "📋" },
         { to: "/painel/perfil", label: "Perfil", emoji: "🙂" },
       ]
     : [

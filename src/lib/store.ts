@@ -11,6 +11,24 @@ export function faixaDe(etapa: EtapaId): Faixa {
   return etapa === "crisma" ? "jovem" : "infantil";
 }
 
+/* ------------------ Comunidades (turmas paroquiais) ------------------ */
+export type Comunidade = { id: string; nome: string; emoji: string };
+export const COMUNIDADES: Comunidade[] = [
+  { id: "matriz", nome: "Igreja Matriz", emoji: "⛪" },
+  { id: "santuario", nome: "Santuário", emoji: "🕯️" },
+  { id: "santa-rita", nome: "Santa Rita de Cássia", emoji: "🌹" },
+  { id: "guadalupe", nome: "N. Sra. de Guadalupe", emoji: "🌺" },
+  { id: "sao-benedito", nome: "São Benedito", emoji: "🙏" },
+  { id: "sagrada-familia", nome: "Sagrada Família", emoji: "👨‍👩‍👧" },
+  { id: "sao-francisco", nome: "São Francisco de Assis", emoji: "🕊️" },
+  { id: "sao-judas", nome: "São Judas Tadeu", emoji: "✨" },
+];
+
+export function comunidadeNome(id?: string | null) {
+  if (!id) return "—";
+  return COMUNIDADES.find((c) => c.id === id)?.nome ?? id;
+}
+
 export type Aluno = {
   id: string;
   nome: string;
@@ -21,8 +39,8 @@ export type Aluno = {
   responsavel: string;
   telefone: string;
   email?: string;
-  endereco?: string;
-  bairro?: string;
+  comunidade: string;
+  catequistaId?: string | null;
   batizado?: "sim" | "nao" | "";
   batismoParoquia?: string;
   batismoData?: string;
@@ -75,15 +93,82 @@ export type State = {
   catequistas: Catequista[];
   progresso: Record<string, ProgressoAluno>;
   session: Session;
+  liberacoes: Record<string, Record<string, Liberacao>>; // por catequistaId -> nodeId
+  crismaTrail?: CrismaUnidade[];
 };
 
-const KEY = "cd:state:v1";
+/* ------------------ Trilha de Crisma (editável por adm) ------------------ */
+export type CrismaAtividade = { id: string; titulo: string };
+export type CrismaUnidade = {
+  id: string;
+  numero: number;
+  titulo: string;
+  subtitulo: string;
+  cor: "gold" | "leaf" | "habit" | "sky";
+  atividades: CrismaAtividade[];
+};
+
+export const CRISMA_TRAIL_DEFAULT: CrismaUnidade[] = [
+  {
+    id: "u1", numero: 1, titulo: "Fé professada", cor: "habit",
+    subtitulo: "Aquilo que cremos como Igreja",
+    atividades: [
+      { id: "u1-1", titulo: "A fé como dom de Deus" },
+      { id: "u1-2", titulo: "Nossa resposta ao dom de Deus" },
+      { id: "u1-3", titulo: "Creio em Deus, Pai amoroso" },
+      { id: "u1-4", titulo: "Creio em Jesus Cristo" },
+      { id: "u1-5", titulo: "Creio no Espírito Santo" },
+      { id: "u1-6", titulo: "Conclusão: o que aprendi, quais dúvidas ainda tenho?" },
+    ],
+  },
+  {
+    id: "u2", numero: 2, titulo: "Fé celebrada", cor: "gold",
+    subtitulo: "Os sacramentos na vida cristã",
+    atividades: [
+      { id: "u2-1", titulo: "Atividade 1" },
+      { id: "u2-2", titulo: "Atividade 2" },
+      { id: "u2-3", titulo: "Atividade 3" },
+      { id: "u2-4", titulo: "Atividade 4" },
+      { id: "u2-5", titulo: "Conclusão: o que aprendi, quais dúvidas ainda tenho?" },
+    ],
+  },
+  {
+    id: "u3", numero: 3, titulo: "Fé vivida", cor: "leaf",
+    subtitulo: "A vida segundo o Evangelho",
+    atividades: [
+      { id: "u3-1", titulo: "Atividade 1" },
+      { id: "u3-2", titulo: "Atividade 2" },
+      { id: "u3-3", titulo: "Atividade 3" },
+      { id: "u3-4", titulo: "Atividade 4" },
+      { id: "u3-5", titulo: "Atividade 5" },
+      { id: "u3-6", titulo: "Conclusão: o que aprendi, quais dúvidas ainda tenho?" },
+    ],
+  },
+  {
+    id: "u4", numero: 4, titulo: "Fé rezada", cor: "sky",
+    subtitulo: "A oração que sustenta o discípulo",
+    atividades: [
+      { id: "u4-1", titulo: "Atividade 1" },
+      { id: "u4-2", titulo: "Atividade 2" },
+      { id: "u4-3", titulo: "Atividade 3" },
+      { id: "u4-4", titulo: "Atividade 4" },
+      { id: "u4-5", titulo: "Atividade 5" },
+      { id: "u4-6", titulo: "Conclusão: o que aprendi, quais dúvidas ainda tenho?" },
+    ],
+  },
+];
+
+/* ------------------ Liberações (por turma = catequistaId) ------------------ */
+export type Liberacao = { releasedAt: number; deadline: number };
+
+const KEY = "cd:state:v2";
 
 const empty: State = {
   alunos: [],
   catequistas: [],
   progresso: {},
   session: null,
+  liberacoes: {},
 };
 
 function read(): State {
@@ -197,6 +282,7 @@ export function logout() {
 export function registrarAluno(input: Omit<Aluno, "id" | "status" | "criadoEm">): Aluno {
   const novo: Aluno = {
     ...input,
+    catequistaId: input.catequistaId ?? null,
     id: `a-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     status: "pending",
     criadoEm: Date.now(),
@@ -219,9 +305,23 @@ export function registrarCatequista(
 }
 
 export function aprovarAluno(id: string) {
+  const aluno = cache.alunos.find((a) => a.id === id);
+  // Aloca automaticamente na turma do catequista da mesma comunidade + etapa
+  let catequistaId: string | null = aluno?.catequistaId ?? null;
+  if (aluno && !catequistaId) {
+    const cat = cache.catequistas.find(
+      (c) =>
+        c.status === "approved" &&
+        c.comunidade === aluno.comunidade &&
+        c.etapas.includes(aluno.etapa),
+    );
+    catequistaId = cat?.id ?? null;
+  }
   write({
     ...cache,
-    alunos: cache.alunos.map((a) => (a.id === id ? { ...a, status: "approved" } : a)),
+    alunos: cache.alunos.map((a) =>
+      a.id === id ? { ...a, status: "approved", catequistaId } : a,
+    ),
   });
 }
 
@@ -233,12 +333,25 @@ export function reprovarAluno(id: string) {
 }
 
 export function aprovarCatequista(id: string) {
-  write({
+  const next: State = {
     ...cache,
     catequistas: cache.catequistas.map((c) =>
-      c.id === id ? { ...c, status: "approved" } : c,
+      c.id === id ? { ...c, status: "approved" as const } : c,
     ),
-  });
+  };
+  // Realoca alunos órfãos (sem catequista) que combinem com a comunidade/etapa
+  const cat = next.catequistas.find((c) => c.id === id);
+  if (cat) {
+    next.alunos = next.alunos.map((a) =>
+      a.status === "approved" &&
+      !a.catequistaId &&
+      a.comunidade === cat.comunidade &&
+      cat.etapas.includes(a.etapa)
+        ? { ...a, catequistaId: cat.id }
+        : a,
+    );
+  }
+  write(next);
 }
 
 export function reprovarCatequista(id: string) {
@@ -278,8 +391,8 @@ export function completarNode(alunoId: string, nodeId: string, xp: number, lirio
   const prev = getProgresso(alunoId);
   if (prev.completed.includes(nodeId)) return prev;
   const today = todayStr();
-  const delta = diffDays(prev.lastDay, today);
-  const streak = !prev.lastDay ? 1 : delta === 0 ? prev.streak : delta === 1 ? prev.streak + 1 : 1;
+  // Streak = sequência de atividades concluídas (não diária)
+  const streak = prev.streak + 1;
   const next: ProgressoAluno = {
     completed: [...prev.completed, nodeId],
     xp: prev.xp + xp,
@@ -289,6 +402,50 @@ export function completarNode(alunoId: string, nodeId: string, xp: number, lirio
   };
   write({ ...cache, progresso: { ...cache.progresso, [alunoId]: next } });
   return next;
+}
+
+/* ------------------ Liberações & Trilha custom ------------------ */
+
+export function getLiberacoes(catequistaId: string | null | undefined): Record<string, Liberacao> {
+  if (!catequistaId) return {};
+  return cache.liberacoes[catequistaId] ?? {};
+}
+
+export function liberarAtividade(
+  catequistaId: string,
+  nodeId: string,
+  prazoDias: number,
+) {
+  const dias = Math.max(1, Math.min(7, Math.round(prazoDias)));
+  const now = Date.now();
+  const atual = cache.liberacoes[catequistaId] ?? {};
+  const next: Liberacao = { releasedAt: now, deadline: now + dias * 86_400_000 };
+  write({
+    ...cache,
+    liberacoes: { ...cache.liberacoes, [catequistaId]: { ...atual, [nodeId]: next } },
+  });
+}
+
+export function recolherAtividade(catequistaId: string, nodeId: string) {
+  const atual = { ...(cache.liberacoes[catequistaId] ?? {}) };
+  delete atual[nodeId];
+  write({
+    ...cache,
+    liberacoes: { ...cache.liberacoes, [catequistaId]: atual },
+  });
+}
+
+export function getCrismaTrail(): CrismaUnidade[] {
+  return cache.crismaTrail ?? CRISMA_TRAIL_DEFAULT;
+}
+
+export function setCrismaTrail(units: CrismaUnidade[]) {
+  write({ ...cache, crismaTrail: units });
+}
+
+export function resetCrismaTrail() {
+  const { crismaTrail: _drop, ...rest } = cache;
+  write({ ...rest });
 }
 
 export function resetProgresso(alunoId: string) {

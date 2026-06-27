@@ -24,7 +24,11 @@ function PainelHome() {
     ? catequistas.find((c) => c.id === session.id) ?? null
     : null;
 
-  const alunosAprovados = alunos.filter((a) => a.status === "approved");
+  const alunosAprovados = alunos.filter((a) => {
+    if (a.status !== "approved") return false;
+    if (isAdmin) return true;
+    return cat ? a.catequistaId === cat.id : false;
+  });
   const pendentes = alunos.filter((a) => a.status === "pending").length
     + catequistas.filter((c) => c.status === "pending").length;
 
