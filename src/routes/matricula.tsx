@@ -604,7 +604,10 @@ function MatriculaPage() {
                 <ReviewRow k={parentesco || "Responsável"} v={responsavel} />
                 <ReviewRow k="Telefone" v={telefone} />
                 {email && <ReviewRow k="E-mail" v={email} />}
-                <ReviewRow k="Endereço" v={`${endereco}, ${bairro}`} />
+                <ReviewRow
+                  k="Comunidade"
+                  v={COMUNIDADES.find((c) => c.id === comunidade)?.nome ?? "—"}
+                />
               </ReviewBlock>
 
               <div className="mt-2 rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-4">
