@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { faixaDe, logout, useStore } from "@/lib/store";
+import { comunidadeNome, faixaDe, logout, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/aluno/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Catequizando Digital" }] }),
@@ -73,7 +73,7 @@ function PerfilPage() {
           <Linha k="Responsável" v={aluno.responsavel} />
           <Linha k="WhatsApp" v={aluno.telefone} />
           {aluno.email && <Linha k="E-mail" v={aluno.email} />}
-          <Linha k="Comunidade" v={comunidadeNomeFromId(aluno.comunidade)} />
+          <Linha k="Comunidade" v={comunidadeNome(aluno.comunidade)} />
         </div>
       </section>
 
