@@ -1,6 +1,13 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { completarNode, faixaDe, getProgresso, useStore, type Faixa } from "@/lib/store";
+import {
+  completarNode,
+  faixaDe,
+  useStore,
+  type Faixa,
+  type CrismaUnidade,
+  type Liberacao,
+} from "@/lib/store";
 
 export const Route = createFileRoute("/aluno/")({
   head: () => ({
@@ -114,6 +121,25 @@ function trilhaParaFaixa(f: Faixa): Unidade[] {
   return f === "jovem" ? TRILHA_JOVEM : TRILHA_INFANTIL;
 }
 
+/** Converte a trilha de Crisma (editável pelo adm) no formato visual da trilha. */
+function crismaParaUnidades(units: CrismaUnidade[]): Unidade[] {
+  return units.map((u) => ({
+    id: u.id,
+    numero: u.numero,
+    titulo: u.titulo,
+    subtitulo: u.subtitulo,
+    cor: u.cor,
+    nodes: u.atividades.map<TrilhaNode>((a, i, arr) => ({
+      id: a.id,
+      titulo: a.titulo,
+      kind: i === arr.length - 1 ? "missao" : "licao",
+      xp: i === arr.length - 1 ? 30 : 20,
+    })),
+  }));
+}
+
+type NodeStatus = "completo" | "atual" | "bloqueado" | "trancado" | "vencido";
+
 /* ──────────────────────────────────────────────────────────────── */
 /*  Página                                                          */
 /* ──────────────────────────────────────────────────────────────── */
@@ -122,12 +148,21 @@ function AtividadesPage() {
     s.session?.kind === "aluno" ? s.alunos.find((a) => a.id === s.session!.id) ?? null : null,
   );
   const prog = useStore((s) => (aluno ? s.progresso[aluno.id] : undefined));
+  const crismaTrail = useStore((s) => s.crismaTrail);
+  const liberacoes = useStore((s) =>
+    aluno?.catequistaId ? s.liberacoes[aluno.catequistaId] ?? {} : {},
+  );
   const [openNodeId, setOpenNodeId] = useState<string | null>(null);
 
   if (!aluno) return null;
   const faixa = faixaDe(aluno.etapa);
-  const unidades = trilhaParaFaixa(faixa);
+  const unidades =
+    faixa === "jovem"
+      ? crismaParaUnidades(crismaTrail ?? defaultCrismaSnapshot())
+      : trilhaParaFaixa(faixa);
   const completed = new Set(prog?.completed ?? []);
+  const now = Date.now();
+  const requerLiberacao = faixa === "jovem";
 
   // calcula status sequencial (primeiro não-completo = atual; depois = bloqueado)
   const nodesPlanos = unidades.flatMap((u) => u.nodes);
@@ -146,10 +181,14 @@ function AtividadesPage() {
     [openNodeId, nodesPlanos],
   );
 
-  function statusOf(id: string): "completo" | "atual" | "bloqueado" {
+  function statusOf(id: string): NodeStatus {
     if (completed.has(id)) return "completo";
-    if (id === firstPending) return "atual";
-    return "bloqueado";
+    if (id !== firstPending) return "bloqueado";
+    if (!requerLiberacao) return "atual";
+    const lib: Liberacao | undefined = liberacoes[id];
+    if (!lib) return "trancado";
+    if (lib.deadline < now) return "vencido";
+    return "atual";
   }
 
   function concluir(node: TrilhaNode) {
@@ -157,6 +196,10 @@ function AtividadesPage() {
     if (statusOf(node.id) !== "atual") return;
     completarNode(aluno.id, node.id, node.xp, node.kind === "bau" ? 3 : 1);
     setOpenNodeId(null);
+  }
+
+  function libInfo(id: string): Liberacao | null {
+    return liberacoes[id] ?? null;
   }
 
   const primeiroNome = aluno.nome.split(" ")[0];
@@ -191,7 +234,7 @@ function AtividadesPage() {
               <p className="mt-0.5 text-[11px] font-bold text-[color:var(--habit)]">{etapaLabel}</p>
             </div>
             <div className="flex items-center gap-1.5">
-              <StatusChip emoji="🔥" v={String(stats.streak)} k="dias" tone="gold" />
+              <StatusChip emoji="🔥" v={String(stats.streak)} k="seq." tone="gold" />
               <StatusChip emoji="⭐" v={String(stats.xp)} k="xp" tone="leaf" />
               <StatusChip emoji="🪷" v={String(stats.lirios)} k="lírios" tone="sky" />
             </div>
@@ -216,12 +259,28 @@ function AtividadesPage() {
         </div>
       </header>
 
+      {requerLiberacao && !aluno.catequistaId && (
+        <div className="mx-auto mt-5 max-w-3xl px-5">
+          <div className="rounded-3xl border-[3px] border-[color:var(--gold)] bg-[color:var(--gold-soft)]/70 p-5 text-center shadow-pop">
+            <p className="text-2xl">🧭</p>
+            <h3 className="mt-1 font-display text-lg font-extrabold text-[color:var(--habit-deep)]">
+              Aguardando seu(sua) catequista
+            </h3>
+            <p className="mt-1 text-[12px] font-bold text-[color:var(--habit-deep)]/80">
+              A coordenação ainda não vinculou sua matrícula a uma turma. Assim que houver um(a)
+              catequista da sua comunidade, suas atividades começarão a ser liberadas.
+            </p>
+          </div>
+        </div>
+      )}
+
       <section className="mx-auto mt-7 max-w-3xl px-5">
         {unidades.map((u, idx) => (
           <UnidadeBlock
             key={u.id}
             unidade={u}
             statusOf={statusOf}
+            libInfo={libInfo}
             onOpen={setOpenNodeId}
             isFirst={idx === 0}
           />
@@ -243,6 +302,7 @@ function AtividadesPage() {
         <NodeSheet
           node={openNode}
           status={statusOf(openNode.id)}
+          liberacao={libInfo(openNode.id)}
           onClose={() => setOpenNodeId(null)}
           onConcluir={() => concluir(openNode)}
         />
@@ -254,11 +314,13 @@ function AtividadesPage() {
 function UnidadeBlock({
   unidade,
   statusOf,
+  libInfo,
   onOpen,
   isFirst,
 }: {
   unidade: Unidade;
-  statusOf: (id: string) => "completo" | "atual" | "bloqueado";
+  statusOf: (id: string) => NodeStatus;
+  libInfo: (id: string) => Liberacao | null;
   onOpen: (id: string) => void;
   isFirst: boolean;
 }) {
@@ -289,7 +351,12 @@ function UnidadeBlock({
           return (
             <li key={node.id} className="relative flex flex-col items-center pb-8 last:pb-0">
               <div className={"transition-transform " + x}>
-                <NodeBubble node={node} status={statusOf(node.id)} onOpen={onOpen} />
+                <NodeBubble
+                  node={node}
+                  status={statusOf(node.id)}
+                  liberacao={libInfo(node.id)}
+                  onOpen={onOpen}
+                />
               </div>
             </li>
           );
@@ -302,14 +369,16 @@ function UnidadeBlock({
 function NodeBubble({
   node,
   status,
+  liberacao,
   onOpen,
 }: {
   node: TrilhaNode;
-  status: "completo" | "atual" | "bloqueado";
+  status: NodeStatus;
+  liberacao: Liberacao | null;
   onOpen: (id: string) => void;
 }) {
   const meta = KIND_META[node.kind];
-  const isLocked = status === "bloqueado";
+  const isLocked = status === "bloqueado" || status === "trancado" || status === "vencido";
   const isDone = status === "completo";
   const isCurrent = status === "atual";
 
@@ -327,6 +396,8 @@ function NodeBubble({
       ? "bg-gradient-leaf text-[color:var(--lily)]"
       : "bg-gradient-gold text-[color:var(--habit-deep)]";
 
+  const lockIcon = status === "vencido" ? "⏰" : status === "trancado" ? "🔒" : "🔒";
+
   return (
     <div className="relative">
       {isCurrent && (
@@ -336,16 +407,16 @@ function NodeBubble({
       )}
       <button
         type="button"
-        disabled={isLocked}
+        disabled={status === "bloqueado"}
         onClick={() => onOpen(node.id)}
         aria-label={`${meta.rotulo}: ${node.titulo}`}
         className={
           "relative flex h-[76px] w-[76px] items-center justify-center rounded-[28px] border-[3px] border-[color:var(--habit-deep)] text-3xl shadow-pop ring-4 transition-transform " +
           face + " " + ring +
-          (isLocked ? " cursor-not-allowed opacity-80" : " hover:-translate-y-0.5 active:translate-y-0")
+          (status === "bloqueado" ? " cursor-not-allowed opacity-80" : " hover:-translate-y-0.5 active:translate-y-0")
         }
       >
-        <span>{isLocked ? "🔒" : meta.emoji}</span>
+        <span>{isLocked ? lockIcon : meta.emoji}</span>
         {isDone && (
           <span className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[color:var(--lily)] text-[color:var(--leaf)] shadow-pop ring-2 ring-[color:var(--leaf)]/40">
             <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="4">
@@ -357,6 +428,21 @@ function NodeBubble({
       <p className={"mt-1 max-w-[120px] text-center text-[11px] font-extrabold leading-tight " + (isLocked ? "text-[color:var(--muted-foreground)]" : "text-[color:var(--habit-deep)]")}>
         {node.titulo}
       </p>
+      {isCurrent && liberacao && (
+        <p className="mt-0.5 max-w-[140px] text-center text-[10px] font-black uppercase tracking-wider text-[color:var(--habit)]">
+          ⏳ {formatDeadline(liberacao.deadline)}
+        </p>
+      )}
+      {status === "trancado" && (
+        <p className="mt-0.5 max-w-[140px] text-center text-[10px] font-bold text-[color:var(--muted-foreground)]">
+          Aguardando liberação
+        </p>
+      )}
+      {status === "vencido" && (
+        <p className="mt-0.5 max-w-[140px] text-center text-[10px] font-black uppercase tracking-wider text-[color:var(--destructive)]">
+          Prazo encerrado
+        </p>
+      )}
     </div>
   );
 }
@@ -380,11 +466,13 @@ function StatusChip({ emoji, v, k, tone }: { emoji: string; v: string; k: string
 function NodeSheet({
   node,
   status,
+  liberacao,
   onClose,
   onConcluir,
 }: {
   node: TrilhaNode;
-  status: "completo" | "atual" | "bloqueado";
+  status: NodeStatus;
+  liberacao: Liberacao | null;
   onClose: () => void;
   onConcluir: () => void;
 }) {
@@ -421,6 +509,22 @@ function NodeSheet({
           {previewFor(node)}
         </p>
 
+        {liberacao && (
+          <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-[color:var(--gold-soft)] px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-[color:var(--habit-deep)]">
+            ⏳ Prazo: {formatDeadline(liberacao.deadline)}
+          </p>
+        )}
+        {status === "trancado" && (
+          <p className="mt-3 rounded-2xl border-2 border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] p-3 text-[12px] font-bold text-[color:var(--habit-deep)]">
+            Esta atividade ainda não foi liberada pelo(a) seu(sua) catequista.
+          </p>
+        )}
+        {status === "vencido" && (
+          <p className="mt-3 rounded-2xl border-2 border-[color:var(--destructive)]/40 bg-[color:var(--destructive)]/10 p-3 text-[12px] font-bold text-[color:var(--destructive)]">
+            O prazo desta atividade encerrou. Procure seu(sua) catequista para reabrir.
+          </p>
+        )}
+
         <div className="mt-4 flex gap-2 pb-2">
           <button
             type="button"
@@ -447,6 +551,24 @@ function NodeSheet({
     </div>
   );
 }
+
+function formatDeadline(deadline: number): string {
+  const ms = deadline - Date.now();
+  if (ms <= 0) return "vencido";
+  const dias = Math.floor(ms / 86_400_000);
+  const horas = Math.floor((ms % 86_400_000) / 3_600_000);
+  if (dias >= 1) return `${dias}d ${horas}h restantes`;
+  return `${horas}h restantes`;
+}
+
+/** Fallback se o store ainda não populou crismaTrail (primeiro render). */
+function defaultCrismaSnapshot(): CrismaUnidade[] {
+  // Import dinâmico evitado — usamos a constante exportada do store.
+  // Este wrapper existe só para tornar legível o fluxo no componente.
+  return CRISMA_DEFAULT;
+}
+
+import { CRISMA_TRAIL_DEFAULT as CRISMA_DEFAULT } from "@/lib/store";
 
 function previewFor(node: TrilhaNode): string {
   switch (node.kind) {
