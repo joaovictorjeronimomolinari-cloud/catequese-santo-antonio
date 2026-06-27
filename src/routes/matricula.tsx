@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
-import { registrarAluno, type EtapaId } from "@/lib/store";
+import { COMUNIDADES, registrarAluno, type EtapaId } from "@/lib/store";
 
 export const Route = createFileRoute("/matricula")({
   head: () => ({
@@ -123,8 +123,7 @@ function MatriculaPage() {
   const [email, setEmail] = useState("");
   const [secResponsavel, setSecResponsavel] = useState("");
   const [secTelefone, setSecTelefone] = useState("");
-  const [endereco, setEndereco] = useState("");
-  const [bairro, setBairro] = useState("");
+  const [comunidade, setComunidade] = useState("");
 
   // Acesso do catequizando
   const [senha, setSenha] = useState("");
@@ -144,8 +143,7 @@ function MatriculaPage() {
       responsavel.trim() !== "" &&
       parentesco.trim() !== "" &&
       telefone.trim() !== "" &&
-      endereco.trim() !== "" &&
-      bairro.trim() !== "",
+      comunidade !== "",
     5: senha.length >= 4 && senha === senha2 && aceite,
   };
 
@@ -164,8 +162,7 @@ function MatriculaPage() {
       responsavel,
       telefone,
       email,
-      endereco,
-      bairro,
+      comunidade,
       batizado,
       batismoParoquia: paroquiaDesconhecida ? "" : batismoParoquia,
       batismoData,
