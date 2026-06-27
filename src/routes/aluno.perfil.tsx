@@ -73,9 +73,7 @@ function PerfilPage() {
           <Linha k="Responsável" v={aluno.responsavel} />
           <Linha k="WhatsApp" v={aluno.telefone} />
           {aluno.email && <Linha k="E-mail" v={aluno.email} />}
-          {(aluno.endereco || aluno.bairro) && (
-            <Linha k="Endereço" v={`${aluno.endereco ?? ""}${aluno.bairro ? " · " + aluno.bairro : ""}`} />
-          )}
+          <Linha k="Comunidade" v={comunidadeNomeFromId(aluno.comunidade)} />
         </div>
       </section>
 

@@ -333,10 +333,10 @@ export function reprovarAluno(id: string) {
 }
 
 export function aprovarCatequista(id: string) {
-  const next = {
+  const next: State = {
     ...cache,
     catequistas: cache.catequistas.map((c) =>
-      c.id === id ? { ...c, status: "approved" } : c,
+      c.id === id ? { ...c, status: "approved" as const } : c,
     ),
   };
   // Realoca alunos órfãos (sem catequista) que combinem com a comunidade/etapa
