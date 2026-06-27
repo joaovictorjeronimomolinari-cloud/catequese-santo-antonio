@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useStore } from "@/lib/store";
+import { comunidadeNome, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/painel/turma")({
   head: () => ({ meta: [{ title: "Turma — Painel do Catequista" }] }),
@@ -13,17 +13,33 @@ const ETAPA_LABEL: Record<string, string> = {
 };
 
 function TurmaPage() {
-  const alunos = useStore((s) => s.alunos.filter((a) => a.status === "approved"));
+  const session = useStore((s) => s.session);
+  const allAlunos = useStore((s) => s.alunos);
+  const catequistas = useStore((s) => s.catequistas);
+
+  const isAdmin = session?.kind === "admin";
+  const cat =
+    !isAdmin && session?.kind === "catequista"
+      ? catequistas.find((c) => c.id === session.id) ?? null
+      : null;
+
+  const alunos = allAlunos.filter((a) => {
+    if (a.status !== "approved") return false;
+    if (isAdmin) return true;
+    return cat ? a.catequistaId === cat.id : false;
+  });
 
   return (
     <main className="mx-auto max-w-3xl px-5 pb-10 pt-6">
       <header>
-        <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[color:var(--habit)]">Catequizandos</p>
+        <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[color:var(--habit)]">
+          {isAdmin ? "Coordenação" : "Sua turma"}
+        </p>
         <h1 className="mt-1 font-display text-3xl font-extrabold leading-tight text-[color:var(--habit-deep)]">
-          Turmas ativas
+          {isAdmin ? "Turmas ativas" : `${comunidadeNome(cat?.comunidade)}`}
         </h1>
         <p className="mt-1 text-[13px] font-semibold text-[color:var(--muted-foreground)]">
-          {alunos.length} catequizando(s) aprovado(s).
+          {alunos.length} catequizando(s) {isAdmin ? "aprovado(s)" : "na sua turma"}.
         </p>
       </header>
 
@@ -41,7 +57,7 @@ function TurmaPage() {
               <div className="min-w-0 flex-1">
                 <p className="truncate font-display text-sm font-extrabold text-[color:var(--habit-deep)]">{a.nome}</p>
                 <p className="truncate text-[11px] font-semibold text-[color:var(--muted-foreground)]">
-                  {ETAPA_LABEL[a.etapa] ?? a.etapa} · {a.responsavel} · {a.telefone}
+                  {ETAPA_LABEL[a.etapa] ?? a.etapa} · {comunidadeNome(a.comunidade)} · {a.telefone}
                 </p>
               </div>
             </li>
