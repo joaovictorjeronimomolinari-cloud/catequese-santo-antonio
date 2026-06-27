@@ -7,6 +7,7 @@ import {
   type Faixa,
   type CrismaUnidade,
   type Liberacao,
+  CRISMA_TRAIL_DEFAULT,
 } from "@/lib/store";
 
 export const Route = createFileRoute("/aluno/")({
@@ -158,7 +159,7 @@ function AtividadesPage() {
   const faixa = faixaDe(aluno.etapa);
   const unidades =
     faixa === "jovem"
-      ? crismaParaUnidades(crismaTrail ?? defaultCrismaSnapshot())
+      ? crismaParaUnidades(crismaTrail ?? CRISMA_TRAIL_DEFAULT)
       : trilhaParaFaixa(faixa);
   const completed = new Set(prog?.completed ?? []);
   const now = Date.now();
@@ -560,15 +561,6 @@ function formatDeadline(deadline: number): string {
   if (dias >= 1) return `${dias}d ${horas}h restantes`;
   return `${horas}h restantes`;
 }
-
-/** Fallback se o store ainda não populou crismaTrail (primeiro render). */
-function defaultCrismaSnapshot(): CrismaUnidade[] {
-  // Import dinâmico evitado — usamos a constante exportada do store.
-  // Este wrapper existe só para tornar legível o fluxo no componente.
-  return CRISMA_DEFAULT;
-}
-
-import { CRISMA_TRAIL_DEFAULT as CRISMA_DEFAULT } from "@/lib/store";
 
 function previewFor(node: TrilhaNode): string {
   switch (node.kind) {
