@@ -532,26 +532,33 @@ function MatriculaPage() {
                   </Field>
                 </div>
               </div>
-              <div className="grid gap-4 sm:grid-cols-[1fr_180px]">
-                <Field label="Endereço" required>
-                  <input
-                    type="text"
-                    value={endereco}
-                    onChange={(e) => setEndereco(e.target.value)}
-                    placeholder="Rua, número e complemento"
-                    className={inputCls}
-                  />
-                </Field>
-                <Field label="Bairro" required>
-                  <input
-                    type="text"
-                    value={bairro}
-                    onChange={(e) => setBairro(e.target.value)}
-                    placeholder="Ex.: Centro"
-                    className={inputCls}
-                  />
-                </Field>
-              </div>
+              <Field
+                label="Comunidade onde participará da catequese"
+                required
+                hint="O catequizando será alocado na turma do(a) catequista responsável por esta comunidade."
+              >
+                <div className="grid gap-2 sm:grid-cols-2">
+                  {COMUNIDADES.map((c) => {
+                    const sel = comunidade === c.id;
+                    return (
+                      <button
+                        key={c.id}
+                        type="button"
+                        onClick={() => setComunidade(c.id)}
+                        className={
+                          "flex items-center gap-3 rounded-2xl border-[3px] p-3 text-left shadow-pop transition hover:-translate-y-0.5 " +
+                          (sel
+                            ? "border-[color:var(--habit-deep)] bg-gradient-habit text-[color:var(--lily)]"
+                            : "border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-[color:var(--habit-deep)]")
+                        }
+                      >
+                        <span className="text-2xl">{c.emoji}</span>
+                        <span className="text-sm font-extrabold">{c.nome}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </Field>
             </div>
           </Card>
         )}
