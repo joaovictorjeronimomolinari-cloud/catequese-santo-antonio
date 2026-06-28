@@ -238,9 +238,7 @@ function AtividadesPage() {
               aria-label="Voltar ao início"
               className="flex h-11 w-11 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-[color:var(--habit-deep)] shadow-pop"
             >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
-                <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
+              <ArrowLeft className="h-5 w-5" strokeWidth={2.6} />
             </Link>
             <div className="min-w-0 flex-1">
               <p className="text-[10px] font-extrabold uppercase tracking-[0.22em] text-[color:var(--muted-foreground)]">
@@ -252,9 +250,9 @@ function AtividadesPage() {
               <p className="mt-0.5 text-[11px] font-bold text-[color:var(--habit)]">{etapaLabel}</p>
             </div>
             <div className="flex items-center gap-1.5">
-              <StatusChip emoji="🔥" v={String(stats.streak)} k="seq." tone="gold" />
-              <StatusChip emoji="⭐" v={String(stats.xp)} k="xp" tone="leaf" />
-              <StatusChip emoji="🪷" v={String(stats.lirios)} k="lírios" tone="sky" />
+              <StatusChip Icon={Flame} v={String(stats.streak)} k="seq." tone="gold" />
+              <StatusChip Icon={Star} v={String(stats.xp)} k="xp" tone="leaf" />
+              <StatusChip Icon={Sparkles} v={String(stats.lirios)} k="lírios" tone="sky" />
             </div>
           </div>
 
@@ -280,7 +278,7 @@ function AtividadesPage() {
       {requerLiberacao && !aluno.catequistaId && (
         <div className="mx-auto mt-5 max-w-3xl px-5">
           <div className="rounded-3xl border-[3px] border-[color:var(--gold)] bg-[color:var(--gold-soft)]/70 p-5 text-center shadow-pop">
-            <p className="text-2xl">🧭</p>
+            <Compass className="mx-auto h-7 w-7 text-[color:var(--habit-deep)]" strokeWidth={2.4} />
             <h3 className="mt-1 font-display text-lg font-extrabold text-[color:var(--habit-deep)]">
               Aguardando seu(sua) catequista
             </h3>
@@ -305,7 +303,7 @@ function AtividadesPage() {
         ))}
         {stats.done === stats.total && (
           <div className="mt-10 rounded-3xl border-[3px] border-[color:var(--gold)] bg-gradient-gold p-6 text-center shadow-gold-pop">
-            <p className="text-3xl">🎉</p>
+            <PartyPopper className="mx-auto h-8 w-8 text-[color:var(--habit-deep)]" strokeWidth={2.4} />
             <h3 className="mt-2 font-display text-2xl font-extrabold text-[color:var(--habit-deep)]">
               Trilha concluída!
             </h3>
@@ -414,7 +412,8 @@ function NodeBubble({
       ? "bg-gradient-leaf text-[color:var(--lily)]"
       : "bg-gradient-gold text-[color:var(--habit-deep)]";
 
-  const lockIcon = status === "vencido" ? "⏰" : status === "trancado" ? "🔒" : "🔒";
+  const LockI = status === "vencido" ? Clock : Lock;
+  const KindI = meta.Icon;
 
   return (
     <div className="relative">
@@ -429,17 +428,15 @@ function NodeBubble({
         onClick={() => onOpen(node.id)}
         aria-label={`${meta.rotulo}: ${node.titulo}`}
         className={
-          "relative flex h-[76px] w-[76px] items-center justify-center rounded-[28px] border-[3px] border-[color:var(--habit-deep)] text-3xl shadow-pop ring-4 transition-transform " +
+          "relative flex h-[76px] w-[76px] items-center justify-center rounded-[28px] border-[3px] border-[color:var(--habit-deep)] shadow-pop ring-4 transition-transform " +
           face + " " + ring +
           (status === "bloqueado" ? " cursor-not-allowed opacity-80" : " hover:-translate-y-0.5 active:translate-y-0")
         }
       >
-        <span>{isLocked ? lockIcon : meta.emoji}</span>
+        {isLocked ? <LockI className="h-8 w-8" strokeWidth={2.4} /> : <KindI className="h-9 w-9" strokeWidth={2.2} />}
         {isDone && (
           <span className="absolute -bottom-1.5 -right-1.5 flex h-7 w-7 items-center justify-center rounded-full bg-[color:var(--lily)] text-[color:var(--leaf)] shadow-pop ring-2 ring-[color:var(--leaf)]/40">
-            <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth="4">
-              <path d="M5 12l4 4L19 6" strokeLinecap="round" strokeLinejoin="round" />
-            </svg>
+            <Check className="h-4 w-4" strokeWidth={3.5} />
           </span>
         )}
       </button>
@@ -447,8 +444,9 @@ function NodeBubble({
         {node.titulo}
       </p>
       {isCurrent && liberacao && (
-        <p className="mt-0.5 max-w-[140px] text-center text-[10px] font-black uppercase tracking-wider text-[color:var(--habit)]">
-          ⏳ {formatDeadline(liberacao.deadline)}
+        <p className="mt-0.5 flex max-w-[140px] items-center justify-center gap-1 text-center text-[10px] font-black uppercase tracking-wider text-[color:var(--habit)]">
+          <Clock className="h-3 w-3" strokeWidth={2.6} />
+          {formatDeadline(liberacao.deadline)}
         </p>
       )}
       {status === "trancado" && (
@@ -465,7 +463,7 @@ function NodeBubble({
   );
 }
 
-function StatusChip({ emoji, v, k, tone }: { emoji: string; v: string; k: string; tone: "gold" | "leaf" | "sky" }) {
+function StatusChip({ Icon, v, k, tone }: { Icon: LucideIcon; v: string; k: string; tone: "gold" | "leaf" | "sky" }) {
   const cls =
     tone === "gold"
       ? "bg-gradient-gold text-[color:var(--habit-deep)] shadow-gold-pop"
@@ -474,7 +472,7 @@ function StatusChip({ emoji, v, k, tone }: { emoji: string; v: string; k: string
       : "bg-[color:var(--sky)] text-[color:var(--habit-deep)] shadow-pop";
   return (
     <span className={"flex h-9 items-center gap-1 rounded-full px-2.5 text-[11px] font-black " + cls}>
-      <span className="text-sm leading-none">{emoji}</span>
+      <Icon className="h-3.5 w-3.5" strokeWidth={2.6} />
       <span className="leading-none">{v}</span>
       <span className="text-[9px] font-extrabold uppercase tracking-wider opacity-80">{k}</span>
     </span>
@@ -506,8 +504,8 @@ function NodeSheet({
       <div className="relative w-full max-w-3xl rounded-t-[32px] border-t-[3px] border-[color:var(--habit-deep)] bg-[color:var(--lily)] p-5 shadow-pop">
         <div className="mx-auto mb-3 h-1.5 w-12 rounded-full bg-[color:var(--habit-deep)]/15" />
         <div className="flex items-center gap-3">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-gold text-3xl shadow-gold-pop">
-            {meta.emoji}
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-gold text-[color:var(--habit-deep)] shadow-gold-pop">
+            <meta.Icon className="h-8 w-8" strokeWidth={2.2} />
           </div>
           <div className="min-w-0 flex-1">
             <p className="text-[10px] font-black uppercase tracking-[0.22em] text-[color:var(--habit)]">
