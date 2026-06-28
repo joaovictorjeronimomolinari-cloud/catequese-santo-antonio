@@ -1,6 +1,23 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import {
+  ArrowLeft,
+  BookOpen,
+  HandHeart,
+  Star,
+  PlayCircle,
+  HelpCircle,
+  Gift,
+  Flame,
+  Sparkles,
+  Lock,
+  Clock,
+  Check,
+  Compass,
+  PartyPopper,
+  type LucideIcon,
+} from "lucide-react";
+import {
   completarNode,
   faixaDe,
   useStore,
@@ -109,13 +126,13 @@ const TRILHA_JOVEM: Unidade[] = [
   },
 ];
 
-const KIND_META: Record<NodeKind, { emoji: string; rotulo: string }> = {
-  licao: { emoji: "📘", rotulo: "Lição" },
-  oracao: { emoji: "🙏", rotulo: "Oração" },
-  missao: { emoji: "⭐", rotulo: "Missão" },
-  video: { emoji: "🎬", rotulo: "Vídeo" },
-  quiz: { emoji: "❓", rotulo: "Quiz" },
-  bau: { emoji: "🎁", rotulo: "Baú" },
+const KIND_META: Record<NodeKind, { Icon: LucideIcon; rotulo: string }> = {
+  licao: { Icon: BookOpen, rotulo: "Lição" },
+  oracao: { Icon: HandHeart, rotulo: "Oração" },
+  missao: { Icon: Star, rotulo: "Missão" },
+  video: { Icon: PlayCircle, rotulo: "Vídeo" },
+  quiz: { Icon: HelpCircle, rotulo: "Quiz" },
+  bau: { Icon: Gift, rotulo: "Baú" },
 };
 
 function trilhaParaFaixa(f: Faixa): Unidade[] {
