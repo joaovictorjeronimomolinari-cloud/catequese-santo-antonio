@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Home, ShieldCheck, ClipboardList, Users, UserRound } from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/painel")({
@@ -12,7 +13,11 @@ export const Route = createFileRoute("/painel")({
   component: PainelLayout,
 });
 
-type Tab = { to: "/painel" | "/painel/turma" | "/painel/atividades" | "/painel/perfil" | "/aprovacoes"; label: string; emoji: string };
+type Tab = {
+  to: "/painel" | "/painel/turma" | "/painel/atividades" | "/painel/perfil" | "/aprovacoes";
+  label: string;
+  Icon: typeof Home;
+};
 
 function PainelLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
@@ -30,16 +35,16 @@ function PainelLayout() {
   const isAdmin = session.kind === "admin";
   const TABS: Tab[] = isAdmin
     ? [
-        { to: "/painel", label: "Início", emoji: "🏠" },
-        { to: "/aprovacoes", label: "Aprovar", emoji: "✅" },
-        { to: "/painel/atividades", label: "Trilha", emoji: "📋" },
-        { to: "/painel/perfil", label: "Perfil", emoji: "🙂" },
+        { to: "/painel", label: "Início", Icon: Home },
+        { to: "/aprovacoes", label: "Aprovar", Icon: ShieldCheck },
+        { to: "/painel/atividades", label: "Trilha", Icon: ClipboardList },
+        { to: "/painel/perfil", label: "Perfil", Icon: UserRound },
       ]
     : [
-        { to: "/painel", label: "Início", emoji: "🏠" },
-        { to: "/painel/turma", label: "Turma", emoji: "👨‍👩‍👧" },
-        { to: "/painel/atividades", label: "Atividades", emoji: "📋" },
-        { to: "/painel/perfil", label: "Perfil", emoji: "🙂" },
+        { to: "/painel", label: "Início", Icon: Home },
+        { to: "/painel/turma", label: "Turma", Icon: Users },
+        { to: "/painel/atividades", label: "Atividades", Icon: ClipboardList },
+        { to: "/painel/perfil", label: "Perfil", Icon: UserRound },
       ];
   return (
     <div className="relative min-h-screen bg-gradient-sky pb-24">
@@ -65,11 +70,13 @@ function PainelLayout() {
                 >
                   <span
                     className={
-                      "flex h-10 w-12 items-center justify-center rounded-xl text-lg transition " +
-                      (active ? "bg-gradient-gold shadow-gold-pop" : "group-hover:bg-[color:var(--habit-deep)]/5")
+                      "flex h-10 w-12 items-center justify-center rounded-xl transition " +
+                      (active
+                        ? "bg-gradient-gold text-[color:var(--habit-deep)] shadow-gold-pop"
+                        : "group-hover:bg-[color:var(--habit-deep)]/5")
                     }
                   >
-                    {t.emoji}
+                    <t.Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden />
                   </span>
                   <span className="text-[10px] font-black uppercase tracking-wider">{t.label}</span>
                 </Link>

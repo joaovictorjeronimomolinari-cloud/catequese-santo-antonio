@@ -49,6 +49,7 @@ export type Aluno = {
   observacoes?: string;
   status: "pending" | "approved" | "rejected";
   criadoEm: number;
+  seed?: boolean;
 };
 
 export type Catequista = {
@@ -184,6 +185,77 @@ function read(): State {
 
 let cache: State = read();
 const listeners = new Set<() => void>();
+
+/* ------------------------------------------------------------------ */
+/*  ⚠️  CONTAS DE TESTE TEMPORÁRIAS                                    */
+/*  Para remover: apague o array TEST_ALUNOS e a chamada               */
+/*  ensureTestAccounts() abaixo.                                       */
+/* ------------------------------------------------------------------ */
+const TEST_ALUNOS: Aluno[] = [
+  {
+    id: "seed-pedro-teste",
+    nome: "Pedro teste",
+    senha: "pedro182",
+    nascimento: "2014-01-01",
+    sexo: "M",
+    etapa: "primeira-comunhao",
+    responsavel: "Responsável teste",
+    telefone: "(00) 00000-0000",
+    email: "",
+    comunidade: "matriz",
+    catequistaId: null,
+    batizado: "sim",
+    batismoParoquia: "Paróquia Santo Antônio",
+    batismoData: "",
+    eucaristia: false,
+    crisma: false,
+    observacoes: "Conta temporária de teste — Primeira Comunhão.",
+    status: "approved",
+    criadoEm: 0,
+    seed: true,
+  },
+  {
+    id: "seed-joao-teste",
+    nome: "João teste",
+    senha: "joao182",
+    nascimento: "2010-01-01",
+    sexo: "M",
+    etapa: "crisma",
+    responsavel: "Responsável teste",
+    telefone: "(00) 00000-0000",
+    email: "",
+    comunidade: "matriz",
+    catequistaId: null,
+    batizado: "sim",
+    batismoParoquia: "Paróquia Santo Antônio",
+    batismoData: "",
+    eucaristia: true,
+    crisma: false,
+    observacoes: "Conta temporária de teste — Crisma.",
+    status: "approved",
+    criadoEm: 0,
+    seed: true,
+  },
+];
+
+function ensureTestAccounts(state: State): State {
+  const existentes = new Map(state.alunos.map((a) => [a.id, a] as const));
+  let mudou = false;
+  for (const t of TEST_ALUNOS) {
+    if (!existentes.has(t.id)) {
+      existentes.set(t.id, t);
+      mudou = true;
+    }
+  }
+  return mudou ? { ...state, alunos: Array.from(existentes.values()) } : state;
+}
+
+cache = ensureTestAccounts(cache);
+if (typeof window !== "undefined") {
+  try {
+    window.localStorage.setItem(KEY, JSON.stringify(cache));
+  } catch {}
+}
 
 function write(next: State) {
   cache = next;

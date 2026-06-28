@@ -1,5 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useEffect } from "react";
+import { Map, BookOpen, HandHeart, Trophy, UserRound } from "lucide-react";
 import { faixaDe, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/aluno")({
@@ -15,7 +16,7 @@ export const Route = createFileRoute("/aluno")({
 type Tab = {
   to: "/aluno" | "/aluno/devocional" | "/aluno/conquistas" | "/aluno/perfil";
   label: string;
-  emoji: string;
+  Icon: typeof Map;
 };
 
 function AlunoLayout() {
@@ -34,14 +35,14 @@ function AlunoLayout() {
 
   const faixa = faixaDe(aluno.etapa);
   const TABS: Tab[] = [
-    { to: "/aluno", label: "Atividades", emoji: "🗺️" },
+    { to: "/aluno", label: "Atividades", Icon: Map },
     {
       to: "/aluno/devocional",
       label: faixa === "jovem" ? "Devocional" : "Orações",
-      emoji: faixa === "jovem" ? "📖" : "🙏",
+      Icon: faixa === "jovem" ? BookOpen : HandHeart,
     },
-    { to: "/aluno/conquistas", label: "Conquistas", emoji: "🏆" },
-    { to: "/aluno/perfil", label: "Perfil", emoji: "🙂" },
+    { to: "/aluno/conquistas", label: "Conquistas", Icon: Trophy },
+    { to: "/aluno/perfil", label: "Perfil", Icon: UserRound },
   ];
 
   return (
@@ -72,13 +73,13 @@ function AlunoLayout() {
                 >
                   <span
                     className={
-                      "flex h-10 w-12 items-center justify-center rounded-xl text-lg transition " +
+                      "flex h-10 w-12 items-center justify-center rounded-xl transition " +
                       (active
-                        ? "bg-gradient-gold shadow-gold-pop"
+                        ? "bg-gradient-gold text-[color:var(--habit-deep)] shadow-gold-pop"
                         : "bg-transparent group-hover:bg-[color:var(--habit-deep)]/5")
                     }
                   >
-                    {t.emoji}
+                    <t.Icon className="h-5 w-5" strokeWidth={2.5} aria-hidden />
                   </span>
                   <span className="text-[10px] font-black uppercase tracking-wider">{t.label}</span>
                 </Link>
