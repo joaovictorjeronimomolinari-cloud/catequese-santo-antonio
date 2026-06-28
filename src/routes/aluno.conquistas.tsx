@@ -1,4 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
+import {
+  Award,
+  Star,
+  Sparkles,
+  Footprints,
+  Heart,
+  BookOpen,
+  Flower2,
+  Gift,
+  Lock,
+  type LucideIcon,
+} from "lucide-react";
 import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/aluno/conquistas")({
@@ -10,19 +22,19 @@ type Medalha = {
   id: string;
   nome: string;
   desc: string;
-  emoji: string;
+  Icon: LucideIcon;
   cor: "gold" | "leaf" | "habit" | "sky";
   meta: number;
   alcancado: (p: { xp: number; streak: number; done: number; lirios: number }) => number;
 };
 
 const MEDALHAS: Medalha[] = [
-  { id: "m1", nome: "Primeiros passos", desc: "Conclua sua primeira atividade", emoji: "👣", cor: "gold", meta: 1, alcancado: (p) => Math.min(p.done, 1) },
-  { id: "m2", nome: "Coração orante", desc: "Reze 7 dias seguidos", emoji: "❤️", cor: "leaf", meta: 7, alcancado: (p) => Math.min(p.streak, 7) },
-  { id: "m3", nome: "Discípulo da Palavra", desc: "Complete 10 atividades", emoji: "📖", cor: "habit", meta: 10, alcancado: (p) => Math.min(p.done, 10) },
-  { id: "m4", nome: "Coletor de lírios", desc: "Junte 20 lírios", emoji: "🪷", cor: "sky", meta: 20, alcancado: (p) => Math.min(p.lirios, 20) },
-  { id: "m5", nome: "Caminho de luz", desc: "Acumule 100 XP", emoji: "⭐", cor: "gold", meta: 100, alcancado: (p) => Math.min(p.xp, 100) },
-  { id: "m6", nome: "Caçador de baús", desc: "Abra 3 baús do Frei Antônio", emoji: "🎁", cor: "leaf", meta: 3, alcancado: () => 0 },
+  { id: "m1", nome: "Primeiros passos", desc: "Conclua sua primeira atividade", Icon: Footprints, cor: "gold", meta: 1, alcancado: (p) => Math.min(p.done, 1) },
+  { id: "m2", nome: "Coração orante", desc: "Reze 7 dias seguidos", Icon: Heart, cor: "leaf", meta: 7, alcancado: (p) => Math.min(p.streak, 7) },
+  { id: "m3", nome: "Discípulo da Palavra", desc: "Complete 10 atividades", Icon: BookOpen, cor: "habit", meta: 10, alcancado: (p) => Math.min(p.done, 10) },
+  { id: "m4", nome: "Coletor de lírios", desc: "Junte 20 lírios", Icon: Flower2, cor: "sky", meta: 20, alcancado: (p) => Math.min(p.lirios, 20) },
+  { id: "m5", nome: "Caminho de luz", desc: "Acumule 100 XP", Icon: Star, cor: "gold", meta: 100, alcancado: (p) => Math.min(p.xp, 100) },
+  { id: "m6", nome: "Caçador de baús", desc: "Abra 3 baús do Frei Antônio", Icon: Gift, cor: "leaf", meta: 3, alcancado: () => 0 },
 ];
 
 function ConquistasPage() {
@@ -54,9 +66,9 @@ function ConquistasPage() {
       </header>
 
       <section className="mt-5 grid grid-cols-3 gap-3">
-        <Sumario k="Medalhas" v={`${ganhas}/${MEDALHAS.length}`} emoji="🏅" tone="gold" />
-        <Sumario k="XP total" v={String(p.xp)} emoji="⭐" tone="leaf" />
-        <Sumario k="Lírios" v={String(p.lirios)} emoji="🪷" tone="sky" />
+        <Sumario k="Medalhas" v={`${ganhas}/${MEDALHAS.length}`} Icon={Award} tone="gold" />
+        <Sumario k="XP total" v={String(p.xp)} Icon={Star} tone="leaf" />
+        <Sumario k="Lírios" v={String(p.lirios)} Icon={Sparkles} tone="sky" />
       </section>
 
       <section className="mt-8">
@@ -77,14 +89,14 @@ function ConquistasPage() {
   );
 }
 
-function Sumario({ k, v, emoji, tone }: { k: string; v: string; emoji: string; tone: "gold" | "leaf" | "sky" }) {
+function Sumario({ k, v, Icon, tone }: { k: string; v: string; Icon: LucideIcon; tone: "gold" | "leaf" | "sky" }) {
   const cls =
     tone === "gold" ? "bg-gradient-gold text-[color:var(--habit-deep)] shadow-gold-pop"
     : tone === "leaf" ? "bg-gradient-leaf text-[color:var(--lily)] shadow-pop"
     : "bg-[color:var(--sky)] text-[color:var(--habit-deep)] shadow-pop";
   return (
-    <div className={"rounded-2xl border-[3px] border-[color:var(--habit-deep)] p-3 text-center " + cls}>
-      <p className="text-xl">{emoji}</p>
+    <div className={"flex flex-col items-center rounded-2xl border-[3px] border-[color:var(--habit-deep)] p-3 text-center " + cls}>
+      <Icon className="h-5 w-5" strokeWidth={2.4} />
       <p className="mt-0.5 font-display text-lg font-extrabold leading-none">{v}</p>
       <p className="mt-0.5 text-[9px] font-black uppercase tracking-wider opacity-80">{k}</p>
     </div>
@@ -99,10 +111,12 @@ function Medalha({ m, valor, ganha }: { m: Medalha; valor: number; ganha: boolea
     : "bg-[color:var(--sky)] text-[color:var(--habit-deep)]";
   return (
     <div className="flex h-full flex-col items-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/10 bg-[color:var(--lily)] p-3 text-center shadow-pop">
-      <div className={"relative flex h-16 w-16 items-center justify-center rounded-full text-3xl ring-4 ring-[color:var(--gold)]/30 " + tone + (ganha ? "" : " grayscale")}>
-        <span>{m.emoji}</span>
+      <div className={"relative flex h-16 w-16 items-center justify-center rounded-full ring-4 ring-[color:var(--gold)]/30 " + tone + (ganha ? "" : " grayscale")}>
+        <m.Icon className="h-7 w-7" strokeWidth={2.2} />
         {!ganha && (
-          <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--habit-deep)] text-[10px] text-[color:var(--lily)]">🔒</span>
+          <span className="absolute -bottom-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-[color:var(--habit-deep)] text-[color:var(--lily)]">
+            <Lock className="h-3 w-3" strokeWidth={2.8} />
+          </span>
         )}
       </div>
       <p className="mt-2 font-display text-sm font-extrabold leading-tight text-[color:var(--habit-deep)]">{m.nome}</p>

@@ -1,4 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { Flame, Star, Sparkles, UserRound, type LucideIcon } from "lucide-react";
 import { comunidadeNome, faixaDe, logout, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/aluno/perfil")({
@@ -34,8 +35,8 @@ function PerfilPage() {
       <section className="overflow-hidden rounded-3xl border-[3px] border-[color:var(--habit-deep)] bg-gradient-habit p-5 text-[color:var(--lily)] shadow-pop">
         <div className="flex items-center gap-4">
           <div className="relative">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-gold text-3xl text-[color:var(--habit-deep)] shadow-gold-pop ring-4 ring-[color:var(--lily)]">
-              {faixa === "jovem" ? "🧑" : aluno.sexo === "M" ? "👦" : "👧"}
+            <div className="flex h-20 w-20 items-center justify-center rounded-full bg-gradient-gold text-[color:var(--habit-deep)] shadow-gold-pop ring-4 ring-[color:var(--lily)]">
+              <UserRound className="h-10 w-10" strokeWidth={2.2} />
             </div>
           </div>
           <div className="min-w-0 flex-1">
@@ -50,9 +51,9 @@ function PerfilPage() {
         </div>
 
         <div className="mt-4 grid grid-cols-3 gap-2">
-          <Mini k="Sequência" v={`${prog?.streak ?? 0} d`} emoji="🔥" />
-          <Mini k="XP" v={String(prog?.xp ?? 0)} emoji="⭐" />
-          <Mini k="Lírios" v={String(prog?.lirios ?? 0)} emoji="🪷" />
+          <Mini k="Sequência" v={String(prog?.streak ?? 0)} Icon={Flame} />
+          <Mini k="XP" v={String(prog?.xp ?? 0)} Icon={Star} />
+          <Mini k="Lírios" v={String(prog?.lirios ?? 0)} Icon={Sparkles} />
         </div>
       </section>
 
@@ -89,10 +90,10 @@ function PerfilPage() {
   );
 }
 
-function Mini({ k, v, emoji }: { k: string; v: string; emoji: string }) {
+function Mini({ k, v, Icon }: { k: string; v: string; Icon: LucideIcon }) {
   return (
-    <div className="rounded-2xl bg-white/10 px-3 py-2 text-center backdrop-blur">
-      <p className="text-lg leading-none">{emoji}</p>
+    <div className="flex flex-col items-center rounded-2xl bg-white/10 px-3 py-2 text-center backdrop-blur">
+      <Icon className="h-4 w-4" strokeWidth={2.6} />
       <p className="mt-1 font-display text-base font-extrabold leading-none">{v}</p>
       <p className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-[color:var(--lily)]/80">{k}</p>
     </div>

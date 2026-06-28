@@ -1,4 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { ArrowLeft, GraduationCap, Cross, Clock, Check, Star, Flame, type LucideIcon } from "lucide-react";
 import { ADMINS, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/painel/")({
@@ -42,13 +43,11 @@ function PainelHome() {
           aria-label="Voltar"
           className="flex h-11 w-11 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-[color:var(--habit-deep)] shadow-pop"
         >
-          <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
-            <path d="M15 6l-6 6 6 6" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
+          <ArrowLeft className="h-5 w-5" strokeWidth={2.6} />
         </Link>
         <div className="flex-1">
           <p className="text-[10px] font-black uppercase tracking-[0.28em] text-[color:var(--habit)]">
-            {isAdmin ? "Coordenação 🙏" : "Paz e Bem, catequista 🙏"}
+            {isAdmin ? "Coordenação" : "Paz e Bem, catequista"}
           </p>
           <h1 className="mt-1 font-display text-3xl font-extrabold leading-tight text-[color:var(--habit-deep)]">
             Olá, {nome}!
@@ -74,17 +73,18 @@ function PainelHome() {
           </p>
           <Link
             to="/aprovacoes"
-            className="mt-4 inline-flex h-11 items-center justify-center rounded-2xl bg-gradient-gold px-4 text-[12px] font-black uppercase tracking-wider text-[color:var(--habit-deep)] shadow-gold-pop"
+            className="mt-4 inline-flex h-11 items-center justify-center gap-1.5 rounded-2xl bg-gradient-gold px-4 text-[12px] font-black uppercase tracking-wider text-[color:var(--habit-deep)] shadow-gold-pop"
           >
-            ✓ Abrir aprovações
+            <Check className="h-4 w-4" strokeWidth={2.8} />
+            Abrir aprovações
           </Link>
         </section>
       )}
 
       <section className="mt-6 grid grid-cols-3 gap-3">
-        <Stat k="Catequizandos" v={String(alunosAprovados.length)} emoji="🎒" />
-        <Stat k="Catequistas" v={String(catequistas.filter((c) => c.status === "approved").length)} emoji="✝️" />
-        <Stat k="Pendentes" v={String(pendentes)} emoji="⏳" />
+        <Stat k="Catequizandos" v={String(alunosAprovados.length)} Icon={GraduationCap} />
+        <Stat k="Catequistas" v={String(catequistas.filter((c) => c.status === "approved").length)} Icon={Cross} />
+        <Stat k="Pendentes" v={String(pendentes)} Icon={Clock} />
       </section>
 
       <section className="mt-8">
@@ -112,8 +112,12 @@ function PainelHome() {
                       </p>
                     </div>
                     <div className="flex shrink-0 items-center gap-1">
-                      <span className="rounded-full bg-[color:var(--gold-soft)] px-2 py-0.5 text-[10px] font-black text-[color:var(--habit-deep)]">⭐ {p?.xp ?? 0}</span>
-                      <span className="rounded-full bg-[color:var(--leaf)]/15 px-2 py-0.5 text-[10px] font-black text-[color:var(--leaf)]">🔥 {p?.streak ?? 0}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--gold-soft)] px-2 py-0.5 text-[10px] font-black text-[color:var(--habit-deep)]">
+                        <Star className="h-3 w-3" strokeWidth={2.6} /> {p?.xp ?? 0}
+                      </span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--leaf)]/15 px-2 py-0.5 text-[10px] font-black text-[color:var(--leaf)]">
+                        <Flame className="h-3 w-3" strokeWidth={2.6} /> {p?.streak ?? 0}
+                      </span>
                     </div>
                   </div>
                 </li>
@@ -126,10 +130,12 @@ function PainelHome() {
   );
 }
 
-function Stat({ k, v, emoji }: { k: string; v: string; emoji: string }) {
+function Stat({ k, v, Icon }: { k: string; v: string; Icon: LucideIcon }) {
   return (
-    <div className="rounded-2xl border-[3px] border-[color:var(--habit-deep)]/10 bg-[color:var(--lily)] p-3 text-center shadow-pop">
-      <p className="text-lg">{emoji}</p>
+    <div className="flex flex-col items-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/10 bg-[color:var(--lily)] p-3 text-center shadow-pop">
+      <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color:var(--habit-deep)]/8 text-[color:var(--habit-deep)]">
+        <Icon className="h-4 w-4" strokeWidth={2.6} />
+      </span>
       <p className="mt-0.5 font-display text-base font-extrabold leading-none text-[color:var(--habit-deep)]">{v}</p>
       <p className="mt-0.5 text-[9px] font-black uppercase tracking-wider text-[color:var(--muted-foreground)]">{k}</p>
     </div>
