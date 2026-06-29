@@ -112,14 +112,17 @@ function Splash({ verse }: { verse: { ref: string; text: string } }) {
 /* ------------------------------------------------------------------ */
 function Index() {
   const [showSplash, setShowSplash] = useState(true);
-  const [verse] = useState(verseOfTheDay);
+  // Compute the verse only on the client to avoid SSR/CSR hydration mismatches
+  // (the prerendered HTML may have been built on a different day than the client).
+  const [verse, setVerse] = useState<{ ref: string; text: string } | null>(null);
 
   useEffect(() => {
+    setVerse(verseOfTheDay());
     const t = setTimeout(() => setShowSplash(false), 1800);
     return () => clearTimeout(t);
   }, []);
 
-  if (showSplash) return <Splash verse={verse} />;
+  if (showSplash || !verse) return <Splash verse={verse ?? VERSES[0]} />;
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-gradient-sky">
