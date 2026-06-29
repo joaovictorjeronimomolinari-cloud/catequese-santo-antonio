@@ -287,7 +287,8 @@ export function useStore<T>(selector: (s: State) => T): T {
       listeners.forEach((l) => l());
     }
   }, []);
-  return useSyncExternalStore(subscribe, () => selector(cache), () => selector(empty));
+  const state = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
+  return selector(state);
 }
 
 /* ------------------ Admins fixos (não persistidos) ------------------ */
