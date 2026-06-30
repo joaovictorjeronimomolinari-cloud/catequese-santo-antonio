@@ -264,6 +264,13 @@ function Index() {
             >
               🔑 Já tenho conta — Entrar
             </Link>
+
+            <Link
+              to="/conheca"
+              className="inline-flex h-12 items-center justify-center rounded-2xl border-[3px] border-dashed border-[color:var(--habit)]/40 bg-[color:var(--card)]/70 px-4 text-[12px] font-black uppercase tracking-[0.14em] text-[color:var(--habit-deep)] shadow-pop transition-transform hover:-translate-y-0.5"
+            >
+              ✨ Conheça o app
+            </Link>
           </div>
 
           {/* Pillar trio — game tiles */}

@@ -81,6 +81,9 @@ export type ProgressoAluno = {
   lirios: number;
   streak: number;
   lastDay: string; // YYYY-MM-DD
+  quizRespostas?: string; // ex.: "ABACDEABCD..." (20 letras quando concluído)
+  santoPadroeiroId?: string | null;
+  colecaoSantos?: string[]; // ids dos santos colecionados
 };
 
 export type Session =
@@ -444,10 +447,13 @@ const emptyProg: ProgressoAluno = {
   lirios: 0,
   streak: 0,
   lastDay: "",
+  quizRespostas: "",
+  santoPadroeiroId: null,
+  colecaoSantos: [],
 };
 
 export function getProgresso(alunoId: string): ProgressoAluno {
-  return cache.progresso[alunoId] ?? emptyProg;
+  return { ...emptyProg, ...(cache.progresso[alunoId] ?? {}) };
 }
 
 function todayStr() {
@@ -524,6 +530,44 @@ export function resetCrismaTrail() {
 export function resetProgresso(alunoId: string) {
   const { [alunoId]: _drop, ...rest } = cache.progresso;
   write({ ...cache, progresso: rest });
+}
+
+/* ------------------ Devocional (Crisma) ------------------ */
+
+export function salvarQuizDevocional(
+  alunoId: string,
+  respostas: string,
+  padroeiroId: string,
+) {
+  const prev = getProgresso(alunoId);
+  const colecao = prev.colecaoSantos ?? [];
+  const next: ProgressoAluno = {
+    ...prev,
+    quizRespostas: respostas,
+    santoPadroeiroId: padroeiroId,
+    colecaoSantos: colecao.includes(padroeiroId) ? colecao : [...colecao, padroeiroId],
+  };
+  write({ ...cache, progresso: { ...cache.progresso, [alunoId]: next } });
+}
+
+export function refazerQuizDevocional(alunoId: string) {
+  const prev = getProgresso(alunoId);
+  const next: ProgressoAluno = {
+    ...prev,
+    quizRespostas: "",
+    santoPadroeiroId: null,
+  };
+  write({ ...cache, progresso: { ...cache.progresso, [alunoId]: next } });
+}
+
+export function toggleSantoColecao(alunoId: string, santoId: string) {
+  const prev = getProgresso(alunoId);
+  const colecao = prev.colecaoSantos ?? [];
+  const novo = colecao.includes(santoId)
+    ? colecao.filter((s) => s !== santoId)
+    : [...colecao, santoId];
+  const next: ProgressoAluno = { ...prev, colecaoSantos: novo };
+  write({ ...cache, progresso: { ...cache.progresso, [alunoId]: next } });
 }
 
 /* ------------------ Helpers ------------------ */

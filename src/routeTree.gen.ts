@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as MatriculaRouteImport } from './routes/matricula'
 import { Route as LoginRouteImport } from './routes/login'
+import { Route as ConhecaRouteImport } from './routes/conheca'
 import { Route as CatequistaRouteImport } from './routes/catequista'
 import { Route as AprovacoesRouteImport } from './routes/aprovacoes'
 import { Route as AlunoRouteImport } from './routes/aluno'
@@ -38,6 +39,11 @@ const MatriculaRoute = MatriculaRouteImport.update({
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ConhecaRoute = ConhecaRouteImport.update({
+  id: '/conheca',
+  path: '/conheca',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CatequistaRoute = CatequistaRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/aluno': typeof AlunoRouteWithChildren
   '/aprovacoes': typeof AprovacoesRoute
   '/catequista': typeof CatequistaRoute
+  '/conheca': typeof ConhecaRoute
   '/login': typeof LoginRoute
   '/matricula': typeof MatriculaRoute
   '/painel': typeof PainelRouteWithChildren
@@ -122,6 +129,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/aprovacoes': typeof AprovacoesRoute
   '/catequista': typeof CatequistaRoute
+  '/conheca': typeof ConhecaRoute
   '/login': typeof LoginRoute
   '/matricula': typeof MatriculaRoute
   '/aluno/conquistas': typeof AlunoConquistasRoute
@@ -139,6 +147,7 @@ export interface FileRoutesById {
   '/aluno': typeof AlunoRouteWithChildren
   '/aprovacoes': typeof AprovacoesRoute
   '/catequista': typeof CatequistaRoute
+  '/conheca': typeof ConhecaRoute
   '/login': typeof LoginRoute
   '/matricula': typeof MatriculaRoute
   '/painel': typeof PainelRouteWithChildren
@@ -158,6 +167,7 @@ export interface FileRouteTypes {
     | '/aluno'
     | '/aprovacoes'
     | '/catequista'
+    | '/conheca'
     | '/login'
     | '/matricula'
     | '/painel'
@@ -174,6 +184,7 @@ export interface FileRouteTypes {
     | '/'
     | '/aprovacoes'
     | '/catequista'
+    | '/conheca'
     | '/login'
     | '/matricula'
     | '/aluno/conquistas'
@@ -190,6 +201,7 @@ export interface FileRouteTypes {
     | '/aluno'
     | '/aprovacoes'
     | '/catequista'
+    | '/conheca'
     | '/login'
     | '/matricula'
     | '/painel'
@@ -208,6 +220,7 @@ export interface RootRouteChildren {
   AlunoRoute: typeof AlunoRouteWithChildren
   AprovacoesRoute: typeof AprovacoesRoute
   CatequistaRoute: typeof CatequistaRoute
+  ConhecaRoute: typeof ConhecaRoute
   LoginRoute: typeof LoginRoute
   MatriculaRoute: typeof MatriculaRoute
   PainelRoute: typeof PainelRouteWithChildren
@@ -234,6 +247,13 @@ declare module '@tanstack/react-router' {
       path: '/login'
       fullPath: '/login'
       preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/conheca': {
+      id: '/conheca'
+      path: '/conheca'
+      fullPath: '/conheca'
+      preLoaderRoute: typeof ConhecaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/catequista': {
@@ -361,6 +381,7 @@ const rootRouteChildren: RootRouteChildren = {
   AlunoRoute: AlunoRouteWithChildren,
   AprovacoesRoute: AprovacoesRoute,
   CatequistaRoute: CatequistaRoute,
+  ConhecaRoute: ConhecaRoute,
   LoginRoute: LoginRoute,
   MatriculaRoute: MatriculaRoute,
   PainelRoute: PainelRouteWithChildren,
