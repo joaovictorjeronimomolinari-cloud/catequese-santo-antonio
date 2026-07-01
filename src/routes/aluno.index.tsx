@@ -564,9 +564,26 @@ function NodeSheet({
           </div>
         </div>
 
-        <p className="mt-4 rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-3 text-[13px] font-semibold text-[color:var(--habit-deep)]">
-          {previewFor(node)}
-        </p>
+        {(() => {
+          const interativa = ATIVIDADES_INTERATIVAS[node.id];
+          const podeJogar = status === "atual" || status === "completo";
+          if (interativa && podeJogar) {
+            return (
+              <div className="mt-4 max-h-[65vh] overflow-y-auto">
+                <InteractiveActivity
+                  atividade={interativa}
+                  concluida={status === "completo"}
+                  onCompleta={onConcluir}
+                />
+              </div>
+            );
+          }
+          return (
+            <p className="mt-4 rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-3 text-[13px] font-semibold text-[color:var(--habit-deep)]">
+              {previewFor(node)}
+            </p>
+          );
+        })()}
 
         {liberacao && (
           <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-[color:var(--gold-soft)] px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-[color:var(--habit-deep)]">
@@ -590,9 +607,10 @@ function NodeSheet({
             onClick={onClose}
             className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-sm font-black uppercase tracking-wider text-[color:var(--habit-deep)] shadow-pop"
           >
-            Mais tarde
+            {ATIVIDADES_INTERATIVAS[node.id] ? "Fechar" : "Mais tarde"}
           </button>
-          <button
+          {!ATIVIDADES_INTERATIVAS[node.id] && (
+            <button
             type="button"
             onClick={onConcluir}
             disabled={status !== "atual"}
@@ -604,7 +622,8 @@ function NodeSheet({
                 <path d="M5 12l4 4L19 6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
-          </button>
+            </button>
+          )}
         </div>
       </div>
     </div>
