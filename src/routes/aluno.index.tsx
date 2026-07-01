@@ -15,6 +15,10 @@ import {
   Check,
   Compass,
   PartyPopper,
+  Search,
+  Shuffle,
+  Eye,
+  Puzzle,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -26,6 +30,12 @@ import {
   type Liberacao,
   CRISMA_TRAIL_DEFAULT,
 } from "@/lib/store";
+import {
+  ATIVIDADES_INTERATIVAS,
+  trilhaInfantilDe,
+  type InfantilUnidade,
+} from "@/lib/atividades-infantis";
+import { InteractiveActivity } from "@/components/atividades/InteractiveActivity";
 
 export const Route = createFileRoute("/aluno/")({
   head: () => ({
@@ -41,7 +51,17 @@ export const Route = createFileRoute("/aluno/")({
 /*  Dados da trilha — fixos por faixa, persistência via store        */
 /* ──────────────────────────────────────────────────────────────── */
 
-type NodeKind = "licao" | "oracao" | "missao" | "video" | "quiz" | "bau";
+type NodeKind =
+  | "licao"
+  | "oracao"
+  | "missao"
+  | "video"
+  | "quiz"
+  | "bau"
+  | "caca-palavras"
+  | "cenas-biblicas"
+  | "sete-erros"
+  | "quebra-cabeca";
 type TrilhaNode = { id: string; titulo: string; kind: NodeKind; xp: number };
 type Unidade = {
   id: string;
@@ -133,10 +153,31 @@ const KIND_META: Record<NodeKind, { Icon: LucideIcon; rotulo: string }> = {
   video: { Icon: PlayCircle, rotulo: "Vídeo" },
   quiz: { Icon: HelpCircle, rotulo: "Quiz" },
   bau: { Icon: Gift, rotulo: "Baú" },
+  "caca-palavras": { Icon: Search, rotulo: "Caça-palavras" },
+  "cenas-biblicas": { Icon: Shuffle, rotulo: "Cenas bíblicas" },
+  "sete-erros": { Icon: Eye, rotulo: "7 erros" },
+  "quebra-cabeca": { Icon: Puzzle, rotulo: "Quebra-cabeça" },
 };
 
 function trilhaParaFaixa(f: Faixa): Unidade[] {
   return f === "jovem" ? TRILHA_JOVEM : TRILHA_INFANTIL;
+}
+
+/** Converte trilha infantil (por etapa) no formato visual da trilha. */
+function infantilParaUnidades(units: InfantilUnidade[]): Unidade[] {
+  return units.map((u) => ({
+    id: u.id,
+    numero: u.numero,
+    titulo: u.titulo,
+    subtitulo: u.subtitulo,
+    cor: u.cor,
+    nodes: u.nodes.map<TrilhaNode>((n) => ({
+      id: n.id,
+      titulo: n.titulo,
+      kind: n.kind as NodeKind,
+      xp: n.xp,
+    })),
+  }));
 }
 
 /** Converte a trilha de Crisma (editável pelo adm) no formato visual da trilha. */
@@ -174,10 +215,12 @@ function AtividadesPage() {
 
   if (!aluno) return null;
   const faixa = faixaDe(aluno.etapa);
-  const unidades =
-    faixa === "jovem"
-      ? crismaParaUnidades(crismaTrail ?? CRISMA_TRAIL_DEFAULT)
-      : trilhaParaFaixa(faixa);
+  const unidades = (() => {
+    if (faixa === "jovem") return crismaParaUnidades(crismaTrail ?? CRISMA_TRAIL_DEFAULT);
+    const infantilTrilha = trilhaInfantilDe(aluno.etapa);
+    if (infantilTrilha) return infantilParaUnidades(infantilTrilha);
+    return trilhaParaFaixa(faixa);
+  })();
   const completed = new Set(prog?.completed ?? []);
   const now = Date.now();
   const requerLiberacao = faixa === "jovem";
@@ -521,9 +564,26 @@ function NodeSheet({
           </div>
         </div>
 
-        <p className="mt-4 rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-3 text-[13px] font-semibold text-[color:var(--habit-deep)]">
-          {previewFor(node)}
-        </p>
+        {(() => {
+          const interativa = ATIVIDADES_INTERATIVAS[node.id];
+          const podeJogar = status === "atual" || status === "completo";
+          if (interativa && podeJogar) {
+            return (
+              <div className="mt-4 max-h-[65vh] overflow-y-auto">
+                <InteractiveActivity
+                  atividade={interativa}
+                  concluida={status === "completo"}
+                  onCompleta={onConcluir}
+                />
+              </div>
+            );
+          }
+          return (
+            <p className="mt-4 rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-3 text-[13px] font-semibold text-[color:var(--habit-deep)]">
+              {previewFor(node)}
+            </p>
+          );
+        })()}
 
         {liberacao && (
           <p className="mt-3 inline-flex items-center gap-2 rounded-full bg-[color:var(--gold-soft)] px-3 py-1.5 text-[11px] font-black uppercase tracking-wider text-[color:var(--habit-deep)]">
@@ -547,9 +607,10 @@ function NodeSheet({
             onClick={onClose}
             className="inline-flex h-12 flex-1 items-center justify-center rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] text-sm font-black uppercase tracking-wider text-[color:var(--habit-deep)] shadow-pop"
           >
-            Mais tarde
+            {ATIVIDADES_INTERATIVAS[node.id] ? "Fechar" : "Mais tarde"}
           </button>
-          <button
+          {!ATIVIDADES_INTERATIVAS[node.id] && (
+            <button
             type="button"
             onClick={onConcluir}
             disabled={status !== "atual"}
@@ -561,7 +622,8 @@ function NodeSheet({
                 <path d="M5 12l4 4L19 6" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             )}
-          </button>
+            </button>
+          )}
         </div>
       </div>
     </div>
@@ -591,5 +653,13 @@ function previewFor(node: TrilhaNode): string {
       return "Uma missão para viver em casa esta semana — registre depois com a família.";
     case "bau":
       return "Abra o baú do Frei Antônio: figurinha exclusiva + lírios para colecionar.";
+    case "caca-palavras":
+      return "Toque na primeira e na última letra de cada palavra escondida.";
+    case "cenas-biblicas":
+      return "Toque nas cenas na ordem certa em que a história aconteceu.";
+    case "sete-erros":
+      return "Encontre os 7 símbolos escondidos na cena.";
+    case "quebra-cabeca":
+      return "Toque em cada peça pra ver a imagem completa.";
   }
 }
