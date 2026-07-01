@@ -15,6 +15,10 @@ import {
   Check,
   Compass,
   PartyPopper,
+  Search,
+  Shuffle,
+  Eye,
+  Puzzle,
   type LucideIcon,
 } from "lucide-react";
 import {
@@ -26,6 +30,12 @@ import {
   type Liberacao,
   CRISMA_TRAIL_DEFAULT,
 } from "@/lib/store";
+import {
+  ATIVIDADES_INTERATIVAS,
+  trilhaInfantilDe,
+  type InfantilUnidade,
+} from "@/lib/atividades-infantis";
+import { InteractiveActivity } from "@/components/atividades/InteractiveActivity";
 
 export const Route = createFileRoute("/aluno/")({
   head: () => ({
@@ -41,7 +51,17 @@ export const Route = createFileRoute("/aluno/")({
 /*  Dados da trilha — fixos por faixa, persistência via store        */
 /* ──────────────────────────────────────────────────────────────── */
 
-type NodeKind = "licao" | "oracao" | "missao" | "video" | "quiz" | "bau";
+type NodeKind =
+  | "licao"
+  | "oracao"
+  | "missao"
+  | "video"
+  | "quiz"
+  | "bau"
+  | "caca-palavras"
+  | "cenas-biblicas"
+  | "sete-erros"
+  | "quebra-cabeca";
 type TrilhaNode = { id: string; titulo: string; kind: NodeKind; xp: number };
 type Unidade = {
   id: string;
@@ -133,10 +153,31 @@ const KIND_META: Record<NodeKind, { Icon: LucideIcon; rotulo: string }> = {
   video: { Icon: PlayCircle, rotulo: "Vídeo" },
   quiz: { Icon: HelpCircle, rotulo: "Quiz" },
   bau: { Icon: Gift, rotulo: "Baú" },
+  "caca-palavras": { Icon: Search, rotulo: "Caça-palavras" },
+  "cenas-biblicas": { Icon: Shuffle, rotulo: "Cenas bíblicas" },
+  "sete-erros": { Icon: Eye, rotulo: "7 erros" },
+  "quebra-cabeca": { Icon: Puzzle, rotulo: "Quebra-cabeça" },
 };
 
 function trilhaParaFaixa(f: Faixa): Unidade[] {
   return f === "jovem" ? TRILHA_JOVEM : TRILHA_INFANTIL;
+}
+
+/** Converte trilha infantil (por etapa) no formato visual da trilha. */
+function infantilParaUnidades(units: InfantilUnidade[]): Unidade[] {
+  return units.map((u) => ({
+    id: u.id,
+    numero: u.numero,
+    titulo: u.titulo,
+    subtitulo: u.subtitulo,
+    cor: u.cor,
+    nodes: u.nodes.map<TrilhaNode>((n) => ({
+      id: n.id,
+      titulo: n.titulo,
+      kind: n.kind as NodeKind,
+      xp: n.xp,
+    })),
+  }));
 }
 
 /** Converte a trilha de Crisma (editável pelo adm) no formato visual da trilha. */
@@ -174,10 +215,12 @@ function AtividadesPage() {
 
   if (!aluno) return null;
   const faixa = faixaDe(aluno.etapa);
-  const unidades =
-    faixa === "jovem"
-      ? crismaParaUnidades(crismaTrail ?? CRISMA_TRAIL_DEFAULT)
-      : trilhaParaFaixa(faixa);
+  const unidades = (() => {
+    if (faixa === "jovem") return crismaParaUnidades(crismaTrail ?? CRISMA_TRAIL_DEFAULT);
+    const infantilTrilha = trilhaInfantilDe(aluno.etapa);
+    if (infantilTrilha) return infantilParaUnidades(infantilTrilha);
+    return trilhaParaFaixa(faixa);
+  })();
   const completed = new Set(prog?.completed ?? []);
   const now = Date.now();
   const requerLiberacao = faixa === "jovem";
