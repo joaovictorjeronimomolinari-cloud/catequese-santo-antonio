@@ -634,5 +634,13 @@ function previewFor(node: TrilhaNode): string {
       return "Uma missão para viver em casa esta semana — registre depois com a família.";
     case "bau":
       return "Abra o baú do Frei Antônio: figurinha exclusiva + lírios para colecionar.";
+    case "caca-palavras":
+      return "Toque na primeira e na última letra de cada palavra escondida.";
+    case "cenas-biblicas":
+      return "Toque nas cenas na ordem certa em que a história aconteceu.";
+    case "sete-erros":
+      return "Encontre os 7 símbolos escondidos na cena.";
+    case "quebra-cabeca":
+      return "Toque em cada peça pra ver a imagem completa.";
   }
 }
