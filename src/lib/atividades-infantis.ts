@@ -95,6 +95,16 @@ function novoGrid(n: number): string[][] {
 function posicionar(grid: string[][], p: CacaPalavraItem) {
   const dx = p.dir === "V" ? 0 : 1;
   const dy = p.dir === "H" ? 0 : 1;
+  const n = grid.length;
+  const endR = p.row + (p.palavra.length - 1) * dy;
+  const endC = p.col + (p.palavra.length - 1) * dx;
+  if (p.row < 0 || p.col < 0 || endR >= n || endC >= n) {
+    // Palavra fora do tabuleiro — ignora silenciosamente para não quebrar a UI.
+    if (typeof console !== "undefined") {
+      console.warn(`[caca-palavras] palavra "${p.palavra}" fora do grid ${n}x${n}, ignorada.`);
+    }
+    return;
+  }
   for (let i = 0; i < p.palavra.length; i++) {
     grid[p.row + i * dy]![p.col + i * dx] = p.palavra[i]!;
   }
