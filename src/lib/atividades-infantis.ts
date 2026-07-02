@@ -230,7 +230,7 @@ const CACA_PC3: CacaPalavrasData = montarCaca(
     { palavra: "NOSSO", row: 2, col: 0, dir: "H" },
     { palavra: "AVE", row: 0, col: 5, dir: "V" },
     { palavra: "MARIA", row: 5, col: 2, dir: "H" },
-    { palavra: "AMEM", row: 6, col: 0, dir: "V" }, // vertical curto
+    { palavra: "AMEM", row: 3, col: 7, dir: "V" }, // rows 3..6
     { palavra: "REZAR", row: 1, col: 3, dir: "V" },
   ],
   8,
