@@ -586,3 +586,13 @@ export function getCurrentAdmin(): Admin | null {
   if (cache.session?.kind !== "admin") return null;
   return ADMINS.find((a) => a.id === cache.session?.id) ?? null;
 }
+
+/* ------------------ Admin: mover aluno de turma ------------------ */
+export function moverAluno(alunoId: string, catequistaId: string | null) {
+  write({
+    ...cache,
+    alunos: cache.alunos.map((a) =>
+      a.id === alunoId ? { ...a, catequistaId: catequistaId ?? null } : a,
+    ),
+  });
+}
