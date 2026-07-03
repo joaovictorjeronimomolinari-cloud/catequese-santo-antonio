@@ -252,22 +252,22 @@ export function useStore<T>(selector: (s: State) => T): T {
   return selector(state);
 }
 
-/* ------------------ Admins fixos (não persistidos) ------------------ */
+/* ------------------ Admins (derivados do papel no servidor) ------------------ */
 
 export type Admin = {
-  id: "joao-victor" | "responsavel";
+  id: string;
   nome: string;
-  senha: string;
   apelido: string;
 };
 
-export const ADMINS: Admin[] = [
-  { id: "joao-victor", nome: "João Victor Jerônimo Molinari", senha: "adm182", apelido: "João Victor" },
-  { id: "responsavel", nome: "Responsável da catequese", senha: "paroquia2026", apelido: "Responsável" },
-];
+/* ------------------ Sessão (vinda do Supabase Auth) ------------------ */
 
-function norm(s: string) {
-  return s.trim().toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+export type SessionKind = "aluno" | "catequista" | "admin";
+
+/** Chamada pelo bootstrap em __root.tsx sempre que a sessão do Supabase muda. */
+export function setSessionFromAuth(session: Session) {
+  if (JSON.stringify(cache.session) === JSON.stringify(session)) return;
+  write({ ...cache, session });
 }
 
 /* ------------------ Auth ------------------ */
@@ -276,66 +276,127 @@ export type LoginResult =
   | { ok: true; session: NonNullable<Session> }
   | { ok: false; reason: "nao-encontrado" | "senha-invalida" | "pendente" | "rejeitado" };
 
-export function login(nome: string, senha: string, perfil: "aluno" | "catequista"): LoginResult {
-  const n = norm(nome);
+/**
+ * Autentica via Lovable Cloud (Supabase Auth). Não guarda senha em nenhum
+ * lugar — o cliente envia direto para o servidor, que devolve um token de
+ * sessão de curta duração assinado.
+ */
+export async function login(email: string, senha: string): Promise<LoginResult> {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password: senha,
+  });
+  if (error || !data.user) {
+    const msg = (error?.message ?? "").toLowerCase();
+    if (msg.includes("invalid")) return { ok: false, reason: "senha-invalida" };
+    if (msg.includes("email not confirmed")) return { ok: false, reason: "pendente" };
+    return { ok: false, reason: "nao-encontrado" };
+  }
+  const kind = await resolveKindFromRoles(data.user.id);
+  const nome = (data.user.user_metadata?.nome as string | undefined) ?? data.user.email ?? "";
+  const s: NonNullable<Session> =
+    kind === "admin"
+      ? { kind: "admin", id: data.user.id, nome, email: data.user.email ?? undefined }
+      : { kind, id: data.user.id };
 
-  if (perfil === "catequista") {
-    const admin = ADMINS.find((a) => norm(a.nome) === n);
-    if (admin) {
-      if (admin.senha !== senha) return { ok: false, reason: "senha-invalida" };
-      const s: Session = { kind: "admin", id: admin.id };
-      write({ ...cache, session: s });
-      return { ok: true, session: s! };
-    }
-    const c = cache.catequistas.find((x) => norm(x.nome) === n);
-    if (!c) return { ok: false, reason: "nao-encontrado" };
-    if (c.senha !== senha) return { ok: false, reason: "senha-invalida" };
-    if (c.status === "pending") return { ok: false, reason: "pendente" };
-    if (c.status === "rejeitado" as never) return { ok: false, reason: "rejeitado" };
-    const s: Session = { kind: "catequista", id: c.id };
-    write({ ...cache, session: s });
-    return { ok: true, session: s! };
+  // Bloqueia acesso de aluno/catequista com cadastro local pendente ou rejeitado.
+  if (kind === "aluno") {
+    const a = cache.alunos.find((x) => x.id === data.user!.id);
+    if (a?.status === "pending") { await supabase.auth.signOut(); return { ok: false, reason: "pendente" }; }
+    if (a?.status === "rejected") { await supabase.auth.signOut(); return { ok: false, reason: "rejeitado" }; }
+  } else if (kind === "catequista") {
+    const c = cache.catequistas.find((x) => x.id === data.user!.id);
+    if (c?.status === "pending") { await supabase.auth.signOut(); return { ok: false, reason: "pendente" }; }
+    if (c?.status === "rejected") { await supabase.auth.signOut(); return { ok: false, reason: "rejeitado" }; }
   }
 
-  const a = cache.alunos.find((x) => norm(x.nome) === n);
-  if (!a) return { ok: false, reason: "nao-encontrado" };
-  if (a.senha !== senha) return { ok: false, reason: "senha-invalida" };
-  if (a.status === "pending") return { ok: false, reason: "pendente" };
-  if (a.status === "rejected") return { ok: false, reason: "rejeitado" };
-  const s: Session = { kind: "aluno", id: a.id };
   write({ ...cache, session: s });
-  return { ok: true, session: s! };
+  return { ok: true, session: s };
 }
 
-export function logout() {
+async function resolveKindFromRoles(userId: string): Promise<SessionKind> {
+  const { data } = await supabase
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", userId);
+  const roles = (data ?? []).map((r) => r.role as SessionKind);
+  if (roles.includes("admin")) return "admin";
+  if (roles.includes("catequista")) return "catequista";
+  return "aluno";
+}
+
+export async function logout() {
+  await supabase.auth.signOut();
   write({ ...cache, session: null });
 }
 
 /* ------------------ Registros pendentes ------------------ */
 
-export function registrarAluno(input: Omit<Aluno, "id" | "status" | "criadoEm">): Aluno {
+export type RegistrarAlunoInput = Omit<Aluno, "id" | "status" | "criadoEm"> & {
+  email: string;
+  password: string;
+};
+
+export type RegistrarResult<T> =
+  | { ok: true; record: T }
+  | { ok: false; reason: "email-em-uso" | "email-invalido" | "senha-fraca" | "erro" };
+
+export async function registrarAluno(input: RegistrarAlunoInput): Promise<RegistrarResult<Aluno>> {
+  const { email, password, ...rest } = input;
+  const { data, error } = await supabase.auth.signUp({
+    email: email.trim().toLowerCase(),
+    password,
+    options: {
+      emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+      data: { kind: "aluno", nome: rest.nome },
+    },
+  });
+  if (error || !data.user) return { ok: false, reason: mapSignupError(error?.message) };
   const novo: Aluno = {
-    ...input,
-    catequistaId: input.catequistaId ?? null,
-    id: `a-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    ...rest,
+    email,
+    catequistaId: rest.catequistaId ?? null,
+    id: data.user.id,
     status: "pending",
     criadoEm: Date.now(),
   };
   write({ ...cache, alunos: [...cache.alunos, novo] });
-  return novo;
+  return { ok: true, record: novo };
 }
 
-export function registrarCatequista(
-  input: Omit<Catequista, "id" | "status" | "criadoEm">,
-): Catequista {
+export type RegistrarCatequistaInput = Omit<Catequista, "id" | "status" | "criadoEm"> & {
+  password: string;
+};
+
+export async function registrarCatequista(
+  input: RegistrarCatequistaInput,
+): Promise<RegistrarResult<Catequista>> {
+  const { password, ...rest } = input;
+  const { data, error } = await supabase.auth.signUp({
+    email: rest.email.trim().toLowerCase(),
+    password,
+    options: {
+      emailRedirectTo: typeof window !== "undefined" ? window.location.origin : undefined,
+      data: { kind: "catequista", nome: rest.nome },
+    },
+  });
+  if (error || !data.user) return { ok: false, reason: mapSignupError(error?.message) };
   const novo: Catequista = {
-    ...input,
-    id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    ...rest,
+    id: data.user.id,
     status: "pending",
     criadoEm: Date.now(),
   };
   write({ ...cache, catequistas: [...cache.catequistas, novo] });
-  return novo;
+  return { ok: true, record: novo };
+}
+
+function mapSignupError(msg?: string): "email-em-uso" | "email-invalido" | "senha-fraca" | "erro" {
+  const m = (msg ?? "").toLowerCase();
+  if (m.includes("already") || m.includes("registered") || m.includes("exists")) return "email-em-uso";
+  if (m.includes("email")) return "email-invalido";
+  if (m.includes("password") || m.includes("weak") || m.includes("pwned")) return "senha-fraca";
+  return "erro";
 }
 
 export function aprovarAluno(id: string) {
