@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { supabase } from "@/integrations/supabase/client";
+import { setSessionFromAuth, type Session } from "@/lib/store";
 
 function NotFoundComponent() {
   return (
@@ -126,6 +128,49 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+
+  // Ponte entre o Supabase Auth (fonte de verdade) e o store local.
+  // Todo o resto do app lê a sessão pelo useStore((s) => s.session).
+  useEffect(() => {
+    let cancelled = false;
+    const applyUser = async (userId: string | null, meta?: Record<string, unknown>) => {
+      if (!userId) {
+        if (!cancelled) setSessionFromAuth(null);
+        return;
+      }
+      const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+      if (cancelled) return;
+      const roles = (data ?? []).map((r) => r.role as "admin" | "catequista" | "aluno");
+      const nome = (meta?.nome as string | undefined) ?? undefined;
+      const email = (meta?.email as string | undefined) ?? undefined;
+      const s: Session = roles.includes("admin")
+        ? { kind: "admin", id: userId, nome, email }
+        : roles.includes("catequista")
+        ? { kind: "catequista", id: userId }
+        : { kind: "aluno", id: userId };
+      setSessionFromAuth(s);
+    };
+
+    supabase.auth.getUser().then(({ data }) => {
+      applyUser(data.user?.id ?? null, {
+        ...(data.user?.user_metadata ?? {}),
+        email: data.user?.email,
+      });
+    });
+
+    const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      applyUser(session?.user?.id ?? null, {
+        ...(session?.user?.user_metadata ?? {}),
+        email: session?.user?.email,
+      });
+    });
+
+    return () => {
+      cancelled = true;
+      sub.subscription.unsubscribe();
+    };
+  }, []);
 
   return (
     <QueryClientProvider client={queryClient}>
