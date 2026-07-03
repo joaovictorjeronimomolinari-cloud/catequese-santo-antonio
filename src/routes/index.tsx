@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import mascot from "@/assets/santo-antonio-mascot.jpg";
+import brasao from "@/assets/brasao-paroquia.jpg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -142,8 +143,8 @@ function Index() {
       <header className="relative z-10 flex items-center justify-between px-5 pt-5 sm:px-10 sm:pt-6">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-habit text-[color:var(--gold-soft)] shadow-pop">
-              <LilyIcon className="h-5 w-5" />
+            <div className="flex h-11 w-11 items-center justify-center overflow-hidden rounded-full bg-white ring-2 ring-[color:var(--gold)]/50 shadow-pop">
+              <img src={brasao} alt="Brasão da Paróquia Santo Antônio de Jacutinga" className="h-full w-full object-contain" />
             </div>
             <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-gradient-gold text-[8px] font-black text-[color:var(--habit-deep)] shadow">
               ✦
