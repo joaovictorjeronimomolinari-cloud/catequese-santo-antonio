@@ -180,7 +180,26 @@ function read(): State {
   try {
     const raw = window.localStorage.getItem(KEY);
     if (!raw) return empty;
-    return { ...empty, ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw) as Partial<State> & { session?: unknown };
+    // Estado antigo pode conter senhas em texto puro e uma sessão de admin
+    // gravada no localStorage. Limpamos ambos ao carregar para que nunca mais
+    // vivam no navegador — auth agora é 100% servidor (Supabase Auth).
+    if (Array.isArray(parsed.alunos)) {
+      parsed.alunos = parsed.alunos.map((a) => {
+        const clone = { ...(a as Aluno & { senha?: string }) };
+        delete clone.senha;
+        return clone as Aluno;
+      });
+    }
+    if (Array.isArray(parsed.catequistas)) {
+      parsed.catequistas = parsed.catequistas.map((c) => {
+        const clone = { ...(c as Catequista & { senha?: string }) };
+        delete clone.senha;
+        return clone as Catequista;
+      });
+    }
+    delete parsed.session;
+    return { ...empty, ...(parsed as Partial<State>) };
   } catch {
     return empty;
   }
@@ -189,81 +208,20 @@ function read(): State {
 let cache: State = read();
 const listeners = new Set<() => void>();
 
-/* ------------------------------------------------------------------ */
-/*  ⚠️  CONTAS DE TESTE TEMPORÁRIAS                                    */
-/*  Para remover: apague o array TEST_ALUNOS e a chamada               */
-/*  ensureTestAccounts() abaixo.                                       */
-/* ------------------------------------------------------------------ */
-const TEST_ALUNOS: Aluno[] = [
-  {
-    id: "seed-pedro-teste",
-    nome: "Pedro teste",
-    senha: "pedro182",
-    nascimento: "2014-01-01",
-    sexo: "M",
-    etapa: "primeira-comunhao",
-    responsavel: "Responsável teste",
-    telefone: "(00) 00000-0000",
-    email: "",
-    comunidade: "matriz",
-    catequistaId: null,
-    batizado: "sim",
-    batismoParoquia: "Paróquia Santo Antônio",
-    batismoData: "",
-    eucaristia: false,
-    crisma: false,
-    observacoes: "Conta temporária de teste — Primeira Comunhão.",
-    status: "approved",
-    criadoEm: 0,
-    seed: true,
-  },
-  {
-    id: "seed-joao-teste",
-    nome: "João teste",
-    senha: "joao182",
-    nascimento: "2010-01-01",
-    sexo: "M",
-    etapa: "crisma",
-    responsavel: "Responsável teste",
-    telefone: "(00) 00000-0000",
-    email: "",
-    comunidade: "matriz",
-    catequistaId: null,
-    batizado: "sim",
-    batismoParoquia: "Paróquia Santo Antônio",
-    batismoData: "",
-    eucaristia: true,
-    crisma: false,
-    observacoes: "Conta temporária de teste — Crisma.",
-    status: "approved",
-    criadoEm: 0,
-    seed: true,
-  },
-];
-
-function ensureTestAccounts(state: State): State {
-  const existentes = new Map(state.alunos.map((a) => [a.id, a] as const));
-  let mudou = false;
-  for (const t of TEST_ALUNOS) {
-    if (!existentes.has(t.id)) {
-      existentes.set(t.id, t);
-      mudou = true;
-    }
-  }
-  return mudou ? { ...state, alunos: Array.from(existentes.values()) } : state;
-}
-
-cache = ensureTestAccounts(cache);
+// Após a migração para Supabase Auth, sanitizamos qualquer estado antigo
+// (senhas / sessão salvas em versões anteriores) uma única vez.
 if (typeof window !== "undefined") {
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(cache));
+    const { session: _drop, ...persisted } = cache;
+    window.localStorage.setItem(KEY, JSON.stringify(persisted));
   } catch {}
 }
 
 function write(next: State) {
   cache = next;
   if (typeof window !== "undefined") {
-    window.localStorage.setItem(KEY, JSON.stringify(next));
+    const { session: _drop, ...persisted } = next;
+    window.localStorage.setItem(KEY, JSON.stringify(persisted));
   }
   listeners.forEach((l) => l());
 }
