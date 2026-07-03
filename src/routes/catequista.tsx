@@ -117,12 +117,16 @@ function CatequistaPage() {
 
   const goNext = () => setStep((s) => (s < 6 ? ((s + 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
   const goBack = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
-  const submit = () => {
-    if (!canNext[5]) return;
-    registrarCatequista({
+  const [erroCadastro, setErroCadastro] = useState<string | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const submit = async () => {
+    if (!canNext[5] || enviando) return;
+    setErroCadastro(null);
+    setEnviando(true);
+    const r = await registrarCatequista({
       nome: nome.trim(),
       apelido,
-      senha,
+      password: senha,
       nascimento,
       email,
       telefone,
@@ -138,6 +142,16 @@ function CatequistaPage() {
       biblia,
       foto,
     });
+    setEnviando(false);
+    if (!r.ok) {
+      setErroCadastro(
+        r.reason === "email-em-uso" ? "Já existe uma conta com esse e-mail."
+        : r.reason === "email-invalido" ? "E-mail inválido."
+        : r.reason === "senha-fraca" ? "Senha muito fraca ou já vazada. Escolha outra com pelo menos 8 caracteres."
+        : "Não foi possível criar sua conta. Tente novamente.",
+      );
+      return;
+    }
     setStep(6);
   };
 
