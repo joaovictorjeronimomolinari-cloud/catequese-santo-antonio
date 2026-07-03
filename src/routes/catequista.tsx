@@ -650,14 +650,16 @@ function CatequistaPage() {
               <button
                 type="button"
                 onClick={submit}
-                disabled={!canNext[5]}
+                disabled={!canNext[5] || enviando}
                 className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl bg-gradient-gold text-sm font-black uppercase tracking-wider text-[color:var(--habit-deep)] shadow-gold-pop transition hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50"
               >
-                Criar conta
-                <span>✝️</span>
+                {enviando ? "Enviando..." : (<>Criar conta<span>✝️</span></>)}
               </button>
             )}
           </div>
+          {erroCadastro && step === 5 && (
+            <p className="mx-auto mt-2 max-w-3xl px-1 text-center text-[12px] font-bold text-[color:var(--destructive)]">{erroCadastro}</p>
+          )}
         </div>
       )}
     </main>
