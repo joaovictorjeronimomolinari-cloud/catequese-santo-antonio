@@ -1,6 +1,15 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { COMUNIDADES, registrarAluno, type EtapaId } from "@/lib/store";
+import {
+  EMAIL_DOMAINS_PERMITIDOS,
+  anosAtrasISO,
+  formatBrPhone,
+  hojeISO,
+  isNascimentoAluno,
+  isValidBrPhone,
+  isValidEmail,
+} from "@/lib/validators";
 
 export const Route = createFileRoute("/matricula")({
   head: () => ({
@@ -134,17 +143,22 @@ function MatriculaPage() {
 
   const canNext: Record<number, boolean> = {
     1: !!etapaId,
-    2: nome.trim().length > 2 && !!nascimento && !!sexo,
+    2: nome.trim().length > 2 && isNascimentoAluno(nascimento) && !!sexo,
     3:
       batizado !== "" &&
       (batizado === "nao" ||
-        ((paroquiaDesconhecida || batismoParoquia.trim() !== "") && batismoData !== "")),
+        ((paroquiaDesconhecida || batismoParoquia.trim() !== "") &&
+          !!batismoData &&
+          batismoData <= hojeISO() &&
+          (!nascimento || batismoData >= nascimento))),
     4:
       responsavel.trim() !== "" &&
       parentesco.trim() !== "" &&
-      telefone.trim() !== "" &&
+      isValidBrPhone(telefone) &&
+      (!secTelefone.trim() || isValidBrPhone(secTelefone)) &&
+      (!email.trim() || isValidEmail(email)) &&
       comunidade !== "",
-    5: senha.length >= 6 && senha === senha2 && aceite && email.includes("@"),
+    5: senha.length >= 6 && senha === senha2 && aceite && isValidEmail(email),
   };
 
   const goNext = () => setStep((s) => (s < 6 ? ((s + 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
@@ -155,8 +169,10 @@ function MatriculaPage() {
   const submit = async () => {
     if (!etapa || !aceite || enviando) return;
     if (senha.length < 6 || senha !== senha2) return;
-    if (!email.includes("@")) {
-      setErroCadastro("Informe um e-mail válido no passo Família — ele é usado para o login.");
+    if (!isValidEmail(email)) {
+      setErroCadastro(
+        "Informe um e-mail válido no passo Família (ex.: gmail.com, hotmail.com) — ele é usado para o login.",
+      );
       setStep(4);
       return;
     }
