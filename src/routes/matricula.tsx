@@ -748,14 +748,16 @@ function MatriculaPage() {
               <button
                 type="button"
                 onClick={submit}
-                disabled={!canNext[5]}
+                disabled={!canNext[5] || enviando}
                 className="inline-flex h-12 flex-[2] items-center justify-center gap-2 rounded-2xl bg-gradient-leaf text-sm font-black uppercase tracking-wider text-[color:var(--lily)] shadow-pop transition hover:-translate-y-0.5"
               >
-                Enviar matrícula
-                <span>✨</span>
+                {enviando ? "Enviando..." : (<>Enviar matrícula<span>✨</span></>)}
               </button>
             )}
           </div>
+          {erroCadastro && step === 5 && (
+            <p className="mx-auto mt-2 max-w-3xl px-1 text-center text-[12px] font-bold text-[color:var(--destructive)]">{erroCadastro}</p>
+          )}
         </div>
       )}
     </main>
