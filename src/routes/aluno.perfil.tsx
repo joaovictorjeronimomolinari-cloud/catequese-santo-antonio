@@ -25,8 +25,8 @@ function PerfilPage() {
     ? Math.max(0, Math.floor((Date.now() - new Date(aluno.nascimento).getTime()) / (365.25 * 86_400_000)))
     : null;
 
-  function sair() {
-    logout();
+  async function sair() {
+    await logout();
     navigate({ to: "/" });
   }
 

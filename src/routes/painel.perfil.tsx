@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { ADMINS, logout, useStore } from "@/lib/store";
+import { getCurrentAdmin, logout, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/painel/perfil")({
   head: () => ({ meta: [{ title: "Perfil do Catequista — Catequizando Digital" }] }),
@@ -12,10 +12,10 @@ function PerfilPage() {
   const cat = useStore((s) =>
     s.session?.kind === "catequista" ? s.catequistas.find((c) => c.id === s.session!.id) ?? null : null,
   );
-  const admin = session?.kind === "admin" ? ADMINS.find((a) => a.id === session.id) ?? null : null;
+  const admin = session?.kind === "admin" ? getCurrentAdmin() : null;
 
-  function sair() {
-    logout();
+  async function sair() {
+    await logout();
     navigate({ to: "/" });
   }
 
