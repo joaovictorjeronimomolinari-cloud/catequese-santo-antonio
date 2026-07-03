@@ -150,12 +150,21 @@ function MatriculaPage() {
   const goNext = () => setStep((s) => (s < 6 ? ((s + 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
   const goBack = () => setStep((s) => (s > 1 ? ((s - 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
 
-  const submit = () => {
-    if (!etapa || !aceite) return;
-    if (senha.length < 4 || senha !== senha2) return;
-    registrarAluno({
+  const [erroCadastro, setErroCadastro] = useState<string | null>(null);
+  const [enviando, setEnviando] = useState(false);
+  const submit = async () => {
+    if (!etapa || !aceite || enviando) return;
+    if (senha.length < 6 || senha !== senha2) return;
+    if (!email.includes("@")) {
+      setErroCadastro("Informe um e-mail válido no passo Família — ele é usado para o login.");
+      setStep(4);
+      return;
+    }
+    setErroCadastro(null);
+    setEnviando(true);
+    const r = await registrarAluno({
       nome: nome.trim(),
-      senha,
+      password: senha,
       nascimento,
       sexo,
       etapa: etapa.id as EtapaId,
@@ -170,6 +179,16 @@ function MatriculaPage() {
       crisma,
       observacoes,
     });
+    setEnviando(false);
+    if (!r.ok) {
+      setErroCadastro(
+        r.reason === "email-em-uso" ? "Já existe uma conta com esse e-mail."
+        : r.reason === "email-invalido" ? "E-mail inválido."
+        : r.reason === "senha-fraca" ? "Senha muito fraca ou já vazada. Escolha outra com pelo menos 8 caracteres."
+        : "Não foi possível criar sua matrícula. Tente novamente.",
+      );
+      return;
+    }
     setStep(6);
   };
 
