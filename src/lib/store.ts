@@ -1,8 +1,10 @@
 /* ------------------------------------------------------------------ */
 /*  Catequizando Digital — store local (localStorage)                  */
-/*  Implementação client-side enquanto não há backend conectado.       */
+/*  Perfis, progresso e trilha em cache local (não sensíveis).         */
+/*  Autenticação e sessão vivem no Lovable Cloud (Supabase Auth).      */
 /* ------------------------------------------------------------------ */
 import { useEffect, useSyncExternalStore } from "react";
+import { supabase } from "@/integrations/supabase/client";
 
 export type Faixa = "infantil" | "jovem";
 export type EtapaId = "pre-catequese" | "primeira-comunhao" | "crisma";
@@ -32,7 +34,6 @@ export function comunidadeNome(id?: string | null) {
 export type Aluno = {
   id: string;
   nome: string;
-  senha: string;
   nascimento: string;
   sexo: "F" | "M" | "";
   etapa: EtapaId;
@@ -56,7 +57,6 @@ export type Catequista = {
   id: string;
   nome: string;
   apelido?: string;
-  senha: string;
   nascimento: string;
   email: string;
   telefone: string;
@@ -89,7 +89,7 @@ export type ProgressoAluno = {
 export type Session =
   | { kind: "aluno"; id: string }
   | { kind: "catequista"; id: string }
-  | { kind: "admin"; id: "joao-victor" | "responsavel" }
+  | { kind: "admin"; id: string; nome?: string; email?: string }
   | null;
 
 export type State = {
