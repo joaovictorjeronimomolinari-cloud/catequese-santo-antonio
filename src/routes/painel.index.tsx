@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, GraduationCap, Cross, Clock, Check, Star, Flame, type LucideIcon } from "lucide-react";
-import { ADMINS, useStore } from "@/lib/store";
+import { getCurrentAdmin, useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/painel/")({
   head: () => ({ meta: [{ title: "Início — Painel do Catequista" }] }),
@@ -20,7 +20,7 @@ function PainelHome() {
   const progresso = useStore((s) => s.progresso);
 
   const isAdmin = session?.kind === "admin";
-  const admin = isAdmin ? ADMINS.find((a) => a.id === session.id) ?? null : null;
+  const admin = isAdmin ? getCurrentAdmin() : null;
   const cat = !isAdmin && session?.kind === "catequista"
     ? catequistas.find((c) => c.id === session.id) ?? null
     : null;
