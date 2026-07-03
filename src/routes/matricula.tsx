@@ -144,7 +144,7 @@ function MatriculaPage() {
       parentesco.trim() !== "" &&
       telefone.trim() !== "" &&
       comunidade !== "",
-    5: senha.length >= 4 && senha === senha2 && aceite,
+    5: senha.length >= 6 && senha === senha2 && aceite && email.includes("@"),
   };
 
   const goNext = () => setStep((s) => (s < 6 ? ((s + 1) as 1 | 2 | 3 | 4 | 5 | 6) : s));
