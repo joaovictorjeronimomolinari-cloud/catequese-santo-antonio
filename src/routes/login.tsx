@@ -14,7 +14,7 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [identificador, setIdentificador] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [mostrar, setMostrar] = useState(false);
@@ -23,17 +23,17 @@ function LoginPage() {
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro(null);
-    if (!email.trim() || !senha) {
-      setErro("Preencha o e-mail e a senha.");
+    if (!identificador.trim() || !senha) {
+      setErro("Preencha o e-mail (ou nome de usuário) e a senha.");
       return;
     }
     setEnviando(true);
-    const r = await login(email.trim(), senha);
+    const r = await login(identificador.trim(), senha);
     setEnviando(false);
     if (!r.ok) {
       if (r.reason === "nao-encontrado")
-        setErro("Conta não encontrada. Confira o e-mail ou faça a matrícula.");
-      else if (r.reason === "senha-invalida") setErro("E-mail ou senha incorretos.");
+        setErro("Conta não encontrada. Confira o e-mail/nome ou faça a matrícula.");
+      else if (r.reason === "senha-invalida") setErro("Credenciais incorretas.");
       else if (r.reason === "pendente") setErro("Sua conta ainda está aguardando aprovação.");
       else if (r.reason === "rejeitado") setErro("Cadastro não aprovado. Procure a coordenação.");
       return;
@@ -83,20 +83,20 @@ function LoginPage() {
             Bem-vindo de volta!
           </h2>
           <p className="mt-1 text-[13px] font-semibold text-[color:var(--muted-foreground)]">
-            Entre com o e-mail e senha que cadastrou.
+            Entre com o e-mail ou nome de usuário e a senha que cadastrou.
           </p>
 
           <div className="mt-5 grid gap-4">
             <label className="block">
               <span className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-[color:var(--habit-deep)]">
-                E-mail
+                E-mail ou nome de usuário
               </span>
               <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="familia@email.com"
-                autoComplete="email"
+                type="text"
+                value={identificador}
+                onChange={(e) => setIdentificador(e.target.value)}
+                placeholder="familia@email.com ou Maria Silva"
+                autoComplete="username"
                 className={inputCls}
               />
             </label>

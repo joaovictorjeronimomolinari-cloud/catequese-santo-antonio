@@ -282,8 +282,23 @@ export type LoginResult =
  * sessão de curta duração assinado.
  */
 export async function login(email: string, senha: string): Promise<LoginResult> {
+  const identificador = email.trim();
+  // Se não parece e-mail, tenta resolver por nome cadastrado (aluno ou catequista).
+  let emailReal = identificador.toLowerCase();
+  if (!identificador.includes("@")) {
+    const alvo = identificador.toLowerCase();
+    const aluno = cache.alunos.find(
+      (a) => a.nome.trim().toLowerCase() === alvo && !!a.email,
+    );
+    const cateq = cache.catequistas.find(
+      (c) => c.nome.trim().toLowerCase() === alvo && !!c.email,
+    );
+    const encontrado = aluno?.email ?? cateq?.email;
+    if (!encontrado) return { ok: false, reason: "nao-encontrado" };
+    emailReal = encontrado.toLowerCase();
+  }
   const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.trim().toLowerCase(),
+    email: emailReal,
     password: senha,
   });
   if (error || !data.user) {
