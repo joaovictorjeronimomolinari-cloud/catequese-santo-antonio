@@ -1,6 +1,14 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { registrarCatequista, type EtapaId } from "@/lib/store";
+import {
+  EMAIL_DOMAINS_PERMITIDOS,
+  anosAtrasISO,
+  formatBrPhone,
+  isNascimentoAdulto,
+  isValidBrPhone,
+  isValidEmail,
+} from "@/lib/validators";
 
 export const Route = createFileRoute("/catequista")({
   head: () => ({
@@ -97,8 +105,12 @@ function CatequistaPage() {
   }, [senha]);
 
   const canNext: Record<number, boolean> = {
-    1: nome.trim().length > 2 && !!nascimento,
-    2: email.includes("@") && telefone.trim() !== "" && endereco.trim() !== "" && bairro.trim() !== "",
+    1: nome.trim().length > 2 && isNascimentoAdulto(nascimento),
+    2:
+      isValidEmail(email) &&
+      isValidBrPhone(telefone) &&
+      endereco.trim() !== "" &&
+      bairro.trim() !== "",
     3: !!comunidade && etapas.length > 0 && diasDisponiveis.length > 0,
     4: true,
     5: senha.length >= 6 && senha === senha2 && aceite,
@@ -294,13 +306,23 @@ function CatequistaPage() {
                   className={inputCls}
                 />
               </Field>
-              <Field label="Data de nascimento" required>
+              <Field
+                label="Data de nascimento"
+                required
+                hint="Catequistas devem ser maiores de 18 anos."
+              >
                 <input
                   type="date"
                   value={nascimento}
                   onChange={(e) => setNascimento(e.target.value)}
+                  max={anosAtrasISO(18)}
                   className={inputCls}
                 />
+                {nascimento && !isNascimentoAdulto(nascimento) && (
+                  <p className="mt-1 text-[11px] font-bold text-[color:var(--destructive)]">
+                    A data precisa indicar 18 anos completos ou mais.
+                  </p>
+                )}
               </Field>
             </div>
           </Card>
@@ -315,23 +337,40 @@ function CatequistaPage() {
               subtitle="A coordenação usa esses dados para enviar avisos e materiais."
             />
             <div className="mt-5 grid gap-4">
-              <Field label="E-mail" required>
+              <Field
+                label="E-mail"
+                required
+                hint={`Use um provedor comum (ex.: ${EMAIL_DOMAINS_PERMITIDOS.slice(0, 4).join(", ")}...).`}
+              >
                 <input
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
                   placeholder="catequista@email.com"
                   className={inputCls}
                 />
+                {email && !isValidEmail(email) && (
+                  <p className="mt-1 text-[11px] font-bold text-[color:var(--destructive)]">
+                    E-mail inválido ou provedor não aceito.
+                  </p>
+                )}
               </Field>
-              <Field label="Telefone (WhatsApp)" required>
+              <Field label="Telefone (WhatsApp)" required hint="Inclua o DDD.">
                 <input
                   type="tel"
                   value={telefone}
-                  onChange={(e) => setTelefone(e.target.value)}
+                  onChange={(e) => setTelefone(formatBrPhone(e.target.value))}
+                  inputMode="tel"
+                  maxLength={16}
                   placeholder="(35) 9 9999-9999"
                   className={inputCls}
                 />
+                {telefone && !isValidBrPhone(telefone) && (
+                  <p className="mt-1 text-[11px] font-bold text-[color:var(--destructive)]">
+                    Informe um número com DDD válido (10 ou 11 dígitos).
+                  </p>
+                )}
               </Field>
               <div className="grid gap-4 sm:grid-cols-[1fr_180px]">
                 <Field label="Endereço" required>
