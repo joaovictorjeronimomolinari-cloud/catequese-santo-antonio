@@ -370,13 +370,24 @@ function MatriculaPage() {
                 />
               </Field>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Data de nascimento" required>
+                <Field
+                  label="Data de nascimento"
+                  required
+                  hint="O catequizando precisa ter menos de 18 anos completos."
+                >
                   <input
                     type="date"
                     value={nascimento}
                     onChange={(e) => setNascimento(e.target.value)}
+                    min={anosAtrasISO(18)}
+                    max={hojeISO()}
                     className={inputCls}
                   />
+                  {nascimento && !isNascimentoAluno(nascimento) && (
+                    <p className="mt-1 text-[11px] font-bold text-[color:var(--destructive)]">
+                      A data precisa estar entre hoje e {anosAtrasISO(18)} (menor de 18 anos).
+                    </p>
+                  )}
                 </Field>
                 <Field label="Sexo" required>
                   <div className="grid grid-cols-2 gap-2">
@@ -472,6 +483,8 @@ function MatriculaPage() {
                       type="date"
                       value={batismoData}
                       onChange={(e) => setBatismoData(e.target.value)}
+                      min={nascimento || undefined}
+                      max={hojeISO()}
                       className={inputCls}
                     />
                   </Field>
@@ -523,23 +536,39 @@ function MatriculaPage() {
                 </Field>
               </div>
               <div className="grid gap-4 sm:grid-cols-2">
-                <Field label="Telefone (WhatsApp)" required>
+                <Field label="Telefone (WhatsApp)" required hint="Inclua o DDD.">
                   <input
                     type="tel"
                     value={telefone}
-                    onChange={(e) => setTelefone(e.target.value)}
+                    onChange={(e) => setTelefone(formatBrPhone(e.target.value))}
+                    inputMode="tel"
+                    maxLength={16}
                     placeholder="(35) 9 9999-9999"
                     className={inputCls}
                   />
+                  {telefone && !isValidBrPhone(telefone) && (
+                    <p className="mt-1 text-[11px] font-bold text-[color:var(--destructive)]">
+                      Informe um número com DDD válido (10 ou 11 dígitos).
+                    </p>
+                  )}
                 </Field>
-                <Field label="E-mail">
+                <Field
+                  label="E-mail"
+                  hint={`Use um provedor comum (ex.: ${EMAIL_DOMAINS_PERMITIDOS.slice(0, 4).join(", ")}...).`}
+                >
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    autoComplete="email"
                     placeholder="familia@email.com"
                     className={inputCls}
                   />
+                  {email && !isValidEmail(email) && (
+                    <p className="mt-1 text-[11px] font-bold text-[color:var(--destructive)]">
+                      E-mail inválido ou provedor não aceito.
+                    </p>
+                  )}
                 </Field>
               </div>
               <div className="rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-4">
@@ -556,14 +585,21 @@ function MatriculaPage() {
                       className={inputCls}
                     />
                   </Field>
-                  <Field label="Telefone">
+                  <Field label="Telefone" hint="Inclua o DDD.">
                     <input
                       type="tel"
                       value={secTelefone}
-                      onChange={(e) => setSecTelefone(e.target.value)}
+                      onChange={(e) => setSecTelefone(formatBrPhone(e.target.value))}
+                      inputMode="tel"
+                      maxLength={16}
                       placeholder="(35) 9 9999-9999"
                       className={inputCls}
                     />
+                    {secTelefone && !isValidBrPhone(secTelefone) && (
+                      <p className="mt-1 text-[11px] font-bold text-[color:var(--destructive)]">
+                        Número inválido.
+                      </p>
+                    )}
                   </Field>
                 </div>
               </div>
