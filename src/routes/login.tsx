@@ -14,26 +14,26 @@ export const Route = createFileRoute("/login")({
 
 function LoginPage() {
   const navigate = useNavigate();
-  const [perfil, setPerfil] = useState<"aluno" | "catequista">("aluno");
-  const [nome, setNome] = useState("");
+  const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [erro, setErro] = useState<string | null>(null);
   const [mostrar, setMostrar] = useState(false);
+  const [enviando, setEnviando] = useState(false);
 
-  function onSubmit(e: React.FormEvent) {
+  async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
     setErro(null);
-    if (!nome.trim() || !senha) {
-      setErro("Preencha o nome e a senha.");
+    if (!email.trim() || !senha) {
+      setErro("Preencha o e-mail e a senha.");
       return;
     }
-    const r = login(nome.trim(), senha, perfil);
+    setEnviando(true);
+    const r = await login(email.trim(), senha);
+    setEnviando(false);
     if (!r.ok) {
       if (r.reason === "nao-encontrado")
-        setErro(perfil === "aluno"
-          ? "Catequizando não encontrado. Já fez sua matrícula?"
-          : "Catequista não encontrado. Já criou sua conta?");
-      else if (r.reason === "senha-invalida") setErro("Senha incorreta. Tente novamente.");
+        setErro("Conta não encontrada. Confira o e-mail ou faça a matrícula.");
+      else if (r.reason === "senha-invalida") setErro("E-mail ou senha incorretos.");
       else if (r.reason === "pendente") setErro("Sua conta ainda está aguardando aprovação.");
       else if (r.reason === "rejeitado") setErro("Cadastro não aprovado. Procure a coordenação.");
       return;
@@ -72,29 +72,6 @@ function LoginPage() {
 
       <section className="relative z-10 mx-auto mt-6 max-w-md px-5">
         {/* Selector de perfil */}
-        <div className="grid grid-cols-2 gap-2 rounded-2xl border-[3px] border-[color:var(--habit-deep)]/15 bg-[color:var(--card)] p-1 shadow-pop">
-          {(["aluno", "catequista"] as const).map((p) => {
-            const sel = perfil === p;
-            return (
-              <button
-                key={p}
-                type="button"
-                onClick={() => { setPerfil(p); setErro(null); }}
-                className={
-                  "h-11 rounded-xl text-[12px] font-black uppercase tracking-wider transition " +
-                  (sel
-                    ? p === "aluno"
-                      ? "bg-gradient-gold text-[color:var(--habit-deep)] shadow-gold-pop"
-                      : "bg-gradient-habit text-[color:var(--lily)] shadow-pop"
-                    : "text-[color:var(--habit-deep)]/70 hover:text-[color:var(--habit-deep)]")
-                }
-              >
-                {p === "aluno" ? "🎒 Catequizando" : "✝️ Catequista"}
-              </button>
-            );
-          })}
-        </div>
-
         <form
           onSubmit={onSubmit}
           className="mt-5 rounded-3xl border-[3px] border-[color:var(--habit-deep)]/10 bg-[color:var(--lily)] p-5 shadow-pop sm:p-7"
@@ -103,23 +80,23 @@ function LoginPage() {
             Acesso
           </p>
           <h2 className="mt-1 font-display text-2xl font-extrabold leading-tight text-[color:var(--habit-deep)]">
-            {perfil === "aluno" ? "Bem-vindo de volta!" : "Paz e Bem, catequista"}
+            Bem-vindo de volta!
           </h2>
           <p className="mt-1 text-[13px] font-semibold text-[color:var(--muted-foreground)]">
-            Use o mesmo nome completo do cadastro.
+            Entre com o e-mail e senha que cadastrou.
           </p>
 
           <div className="mt-5 grid gap-4">
             <label className="block">
               <span className="mb-1.5 block text-[11px] font-black uppercase tracking-wider text-[color:var(--habit-deep)]">
-                Nome completo
+                E-mail
               </span>
               <input
-                type="text"
-                value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                placeholder={perfil === "aluno" ? "Ex.: Maria Eduarda Silva" : "Ex.: João Victor Jerônimo Molinari"}
-                autoComplete="username"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="familia@email.com"
+                autoComplete="email"
                 className={inputCls}
               />
             </label>
@@ -155,14 +132,12 @@ function LoginPage() {
 
             <button
               type="submit"
+              disabled={enviando}
               className={
-                "mt-1 inline-flex h-13 h-[52px] items-center justify-center gap-2 rounded-2xl text-sm font-black uppercase tracking-wider transition hover:-translate-y-0.5 " +
-                (perfil === "aluno"
-                  ? "bg-gradient-gold text-[color:var(--habit-deep)] shadow-gold-pop"
-                  : "bg-gradient-habit text-[color:var(--lily)] shadow-pop")
+                "mt-1 inline-flex h-13 h-[52px] items-center justify-center gap-2 rounded-2xl bg-gradient-gold text-sm font-black uppercase tracking-wider text-[color:var(--habit-deep)] shadow-gold-pop transition hover:-translate-y-0.5 disabled:opacity-60"
               }
             >
-              Entrar
+              {enviando ? "Entrando..." : "Entrar"}
               <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth="3">
                 <path d="M5 12h14M13 5l7 7-7 7" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
@@ -171,11 +146,12 @@ function LoginPage() {
 
           <div className="mt-5 border-t border-dashed border-[color:var(--cord)]/40 pt-4 text-center text-[12px] font-semibold text-[color:var(--muted-foreground)]">
             Ainda não tem conta?{" "}
-            <Link
-              to={perfil === "aluno" ? "/matricula" : "/catequista"}
-              className="font-black uppercase tracking-wider text-[color:var(--habit)]"
-            >
-              {perfil === "aluno" ? "Matricular" : "Criar conta"} →
+            <Link to="/matricula" className="font-black uppercase tracking-wider text-[color:var(--habit)]">
+              Matricular →
+            </Link>
+            {" · "}
+            <Link to="/catequista" className="font-black uppercase tracking-wider text-[color:var(--habit)]">
+              Sou catequista →
             </Link>
           </div>
         </form>
