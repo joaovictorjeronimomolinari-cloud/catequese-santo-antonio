@@ -603,7 +603,10 @@ export function getCurrentCatequista(): Catequista | null {
 
 export function getCurrentAdmin(): Admin | null {
   if (cache.session?.kind !== "admin") return null;
-  return ADMINS.find((a) => a.id === cache.session?.id) ?? null;
+  const s = cache.session;
+  const nome = s.nome ?? s.email ?? "Coordenação";
+  const apelido = (nome.split(" ")[0] ?? "Coordenação") as string;
+  return { id: s.id, nome, apelido };
 }
 
 /* ------------------ Admin: mover aluno de turma ------------------ */
