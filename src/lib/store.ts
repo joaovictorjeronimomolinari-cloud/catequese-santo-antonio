@@ -633,3 +633,79 @@ export function moverAluno(alunoId: string, catequistaId: string | null) {
     ),
   });
 }
+
+/* ------------------ Sync com contas de teste (semeadas no servidor) ------------------ */
+
+export type SeedProfile = {
+  id: string;
+  email: string;
+  nome: string;
+  kind: "admin" | "catequista" | "aluno";
+  etapa?: EtapaId;
+};
+
+/**
+ * Garante que os perfis locais (aluno/catequista) das contas semeadas existam
+ * no cache — assim os cards aparecem no painel do admin mesmo em dispositivos
+ * onde ninguém preencheu o formulário. Idempotente.
+ */
+export function upsertSeededProfiles(profiles: SeedProfile[]) {
+  let alunos = cache.alunos;
+  let catequistas = cache.catequistas;
+  const agora = Date.now();
+  for (const p of profiles) {
+    if (p.kind === "aluno") {
+      const existe = alunos.some((a) => a.id === p.id);
+      if (!existe) {
+        alunos = [
+          ...alunos,
+          {
+            id: p.id,
+            nome: p.nome,
+            nascimento: "",
+            sexo: "",
+            etapa: (p.etapa ?? "primeira-comunhao") as EtapaId,
+            responsavel: "Conta de teste",
+            telefone: "",
+            email: p.email,
+            comunidade: "matriz",
+            catequistaId: null,
+            status: "approved",
+            criadoEm: agora,
+            seed: true,
+          },
+        ];
+      }
+    } else if (p.kind === "catequista") {
+      const existe = catequistas.some((c) => c.id === p.id);
+      if (!existe) {
+        catequistas = [
+          ...catequistas,
+          {
+            id: p.id,
+            nome: p.nome,
+            email: p.email,
+            nascimento: "",
+            telefone: "",
+            comunidade: "matriz",
+            etapas: (p.etapa ? [p.etapa] : ["primeira-comunhao", "crisma"]) as EtapaId[],
+            status: "approved",
+            criadoEm: agora,
+          },
+        ];
+      }
+    }
+  }
+  if (alunos !== cache.alunos || catequistas !== cache.catequistas) {
+    write({ ...cache, alunos, catequistas });
+  }
+}
+
+/** Remove o perfil local (aluno/catequista) associado ao user id. */
+export function removerPerfilLocal(userId: string) {
+  const alunos = cache.alunos.filter((a) => a.id !== userId);
+  const catequistas = cache.catequistas.filter((c) => c.id !== userId);
+  if (alunos.length !== cache.alunos.length || catequistas.length !== cache.catequistas.length) {
+    write({ ...cache, alunos, catequistas });
+  }
+}
