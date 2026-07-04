@@ -143,6 +143,14 @@ export const seedTestAccounts = createServerFn({ method: "POST" })
         .from("user_roles")
         .upsert({ user_id: user.id, role: roleToAssign }, { onConflict: "user_id,role" });
 
+      // Remove papéis conflitantes (o trigger handle_new_user pode ter posto 'aluno'
+      // em uma conta que na verdade é admin).
+      await supabaseAdmin
+        .from("user_roles")
+        .delete()
+        .eq("user_id", user.id)
+        .neq("role", roleToAssign);
+
       out.push({
         id: user.id,
         email: acc.email,
