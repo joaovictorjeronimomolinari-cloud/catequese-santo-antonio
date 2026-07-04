@@ -1,6 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, GraduationCap, Cross, Clock, Check, Star, Flame, type LucideIcon } from "lucide-react";
-import { getCurrentAdmin, useStore } from "@/lib/store";
+import { ArrowLeft, GraduationCap, Cross, Clock, Check, Star, Flame, Sparkles, Trash2, ShieldCheck, type LucideIcon } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { getCurrentAdmin, useStore, upsertSeededProfiles, removerPerfilLocal } from "@/lib/store";
+import {
+  seedTestAccounts,
+  listAppUsers,
+  deleteAppUser,
+  type AppUserRow,
+} from "@/lib/test-accounts.functions";
+import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/painel/")({
   head: () => ({ meta: [{ title: "Início — Painel do Catequista" }] }),
@@ -34,6 +42,72 @@ function PainelHome() {
     + catequistas.filter((c) => c.status === "pending").length;
 
   const nome = admin?.apelido ?? cat?.apelido ?? cat?.nome.split(" ")[0] ?? "catequista";
+
+  const seedFn = useServerFn(seedTestAccounts);
+  const listFn = useServerFn(listAppUsers);
+  const deleteFn = useServerFn(deleteAppUser);
+  const [users, setUsers] = useState<AppUserRow[] | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const refresh = useCallback(async () => {
+    if (!isAdmin) return;
+    try {
+      const rows = await listFn();
+      setUsers(rows);
+    } catch (e) {
+      setMsg((e as Error).message);
+    }
+  }, [isAdmin, listFn]);
+
+  // Ao entrar como admin: garante que as contas de teste existam (idempotente)
+  // e carrega a lista de usuários do servidor.
+  useEffect(() => {
+    if (!isAdmin) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const seeded = await seedFn();
+        if (cancelled) return;
+        upsertSeededProfiles(seeded);
+      } catch (e) {
+        if (!cancelled) setMsg((e as Error).message);
+      }
+      await refresh();
+    })();
+    return () => { cancelled = true; };
+  }, [isAdmin, seedFn, refresh]);
+
+  const handleReseed = async () => {
+    setBusy("seed");
+    setMsg(null);
+    try {
+      const seeded = await seedFn();
+      upsertSeededProfiles(seeded);
+      await refresh();
+      setMsg("Contas de teste sincronizadas.");
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const handleDelete = async (u: AppUserRow) => {
+    if (u.protected) return;
+    if (!confirm(`Excluir a conta de ${u.nome} (${u.email})? Essa ação não pode ser desfeita.`)) return;
+    setBusy(u.id);
+    setMsg(null);
+    try {
+      await deleteFn({ data: { userId: u.id } });
+      removerPerfilLocal(u.id);
+      await refresh();
+    } catch (e) {
+      setMsg((e as Error).message);
+    } finally {
+      setBusy(null);
+    }
+  };
 
   return (
     <main className="mx-auto max-w-3xl px-5 pb-10 pt-6">
@@ -86,6 +160,79 @@ function PainelHome() {
         <Stat k="Catequistas" v={String(catequistas.filter((c) => c.status === "approved").length)} Icon={Cross} />
         <Stat k="Pendentes" v={String(pendentes)} Icon={Clock} />
       </section>
+
+      {isAdmin && (
+        <section className="mt-8">
+          <div className="flex items-center justify-between gap-3">
+            <h3 className="font-display text-xl font-extrabold text-[color:var(--habit-deep)]">
+              Contas do sistema
+            </h3>
+            <button
+              type="button"
+              onClick={handleReseed}
+              disabled={busy === "seed"}
+              className="inline-flex h-10 items-center gap-1.5 rounded-xl bg-gradient-gold px-3 text-[11px] font-black uppercase tracking-wider text-[color:var(--habit-deep)] shadow-gold-pop disabled:opacity-60"
+            >
+              <Sparkles className="h-4 w-4" strokeWidth={2.8} />
+              {busy === "seed" ? "Sincronizando…" : "Restaurar contas de teste"}
+            </button>
+          </div>
+          <p className="mt-1 text-[11px] font-semibold text-[color:var(--muted-foreground)]">
+            As contas de admin são permanentes. Contas de teste podem ser excluídas pelo botão de lixeira.
+          </p>
+          {msg && (
+            <p className="mt-2 rounded-lg bg-[color:var(--gold-soft)]/40 px-3 py-2 text-[11px] font-bold text-[color:var(--habit-deep)]">
+              {msg}
+            </p>
+          )}
+          <ul className="mt-3 grid gap-2">
+            {(users ?? []).map((u) => {
+              const isAdminRow = u.roles.includes("admin");
+              return (
+                <li
+                  key={u.id}
+                  className="flex items-center gap-3 rounded-2xl border-[3px] border-[color:var(--habit-deep)]/10 bg-[color:var(--lily)] p-3 shadow-pop"
+                >
+                  <span className={
+                    "flex h-10 w-10 items-center justify-center rounded-xl text-[color:var(--lily)] " +
+                    (isAdminRow ? "bg-gradient-habit" : "bg-[color:var(--habit)]/70")
+                  }>
+                    {isAdminRow ? <ShieldCheck className="h-5 w-5" strokeWidth={2.6} /> : <GraduationCap className="h-5 w-5" strokeWidth={2.6} />}
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-display text-sm font-extrabold text-[color:var(--habit-deep)]">
+                      {u.nome}
+                    </p>
+                    <p className="truncate text-[11px] font-semibold text-[color:var(--muted-foreground)]">
+                      {u.email} · {u.roles.join(", ") || "sem papel"}
+                    </p>
+                  </div>
+                  {u.protected ? (
+                    <span className="rounded-full bg-[color:var(--gold-soft)] px-2 py-0.5 text-[10px] font-black uppercase text-[color:var(--habit-deep)]">
+                      Permanente
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => handleDelete(u)}
+                      disabled={busy === u.id}
+                      aria-label={`Excluir ${u.nome}`}
+                      className="flex h-10 w-10 items-center justify-center rounded-xl border-[3px] border-[color:var(--destructive)]/30 bg-[color:var(--card)] text-[color:var(--destructive)] shadow-pop disabled:opacity-60"
+                    >
+                      <Trash2 className="h-4 w-4" strokeWidth={2.6} />
+                    </button>
+                  )}
+                </li>
+              );
+            })}
+            {users && users.length === 0 && (
+              <li className="rounded-2xl border-2 border-dashed border-[color:var(--cord)]/60 bg-[color:var(--cream)]/60 p-3 text-center text-[11px] font-bold text-[color:var(--muted-foreground)]">
+                Nenhuma conta ainda.
+              </li>
+            )}
+          </ul>
+        </section>
+      )}
 
       <section className="mt-8">
         <h3 className="font-display text-xl font-extrabold text-[color:var(--habit-deep)]">
