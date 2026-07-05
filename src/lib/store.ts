@@ -242,7 +242,10 @@ function getServerSnapshot() {
 export function useStore<T>(selector: (s: State) => T): T {
   // sync local cache with localStorage on mount to survive reloads
   useEffect(() => {
-    const fresh = read();
+    // A sessão vem do Lovable Cloud e fica só em memória. Como `read()` nunca
+    // traz sessão do localStorage, preservar a sessão atual evita que a montagem
+    // de uma nova rota apague o login recém-feito e redirecione de volta.
+    const fresh = { ...read(), session: cache.session };
     if (JSON.stringify(fresh) !== JSON.stringify(cache)) {
       cache = fresh;
       listeners.forEach((l) => l());
