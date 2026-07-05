@@ -133,13 +133,15 @@ function RootComponent() {
   // Todo o resto do app lê a sessão pelo useStore((s) => s.session).
   useEffect(() => {
     let cancelled = false;
+    let authVersion = 0;
     const applyUser = async (userId: string | null, meta?: Record<string, unknown>) => {
+      const version = authVersion;
       if (!userId) {
-        if (!cancelled) setSessionFromAuth(null);
+        if (!cancelled && version === authVersion) setSessionFromAuth(null);
         return;
       }
       const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
-      if (cancelled) return;
+      if (cancelled || version !== authVersion) return;
       const roles = (data ?? []).map((r) => r.role as "admin" | "catequista" | "aluno");
       const nome = (meta?.nome as string | undefined) ?? undefined;
       const email = (meta?.email as string | undefined) ?? undefined;
@@ -151,7 +153,9 @@ function RootComponent() {
       setSessionFromAuth(s);
     };
 
+    const initialVersion = authVersion;
     supabase.auth.getUser().then(({ data }) => {
+      if (initialVersion !== authVersion) return;
       applyUser(data.user?.id ?? null, {
         ...(data.user?.user_metadata ?? {}),
         email: data.user?.email,
@@ -160,6 +164,7 @@ function RootComponent() {
 
     const { data: sub } = supabase.auth.onAuthStateChange((event, session) => {
       if (event !== "SIGNED_IN" && event !== "SIGNED_OUT" && event !== "USER_UPDATED") return;
+      authVersion += 1;
       applyUser(session?.user?.id ?? null, {
         ...(session?.user?.user_metadata ?? {}),
         email: session?.user?.email,
