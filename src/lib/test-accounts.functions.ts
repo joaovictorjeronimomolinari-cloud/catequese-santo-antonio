@@ -112,6 +112,30 @@ export const seedTestAccounts = createServerFn({ method: "POST" })
   .handler(async ({ context }) => {
     await assertAdmin(context);
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    return runSeed(supabaseAdmin);
+  });
+
+/**
+ * Bootstrap sem autenticação: cria as contas de teste APENAS se ainda não
+ * existe nenhum admin no sistema. Depois disso vira no-op (retorna []).
+ * Isso resolve o problema do ovo-e-galinha: sem admin ninguém pode chamar
+ * `seedTestAccounts`, mas os próprios admins são criados pelo seed.
+ */
+export const bootstrapTestAccounts = createServerFn({ method: "POST" }).handler(
+  async () => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { count } = await supabaseAdmin
+      .from("user_roles")
+      .select("user_id", { count: "exact", head: true })
+      .eq("role", "admin");
+    if ((count ?? 0) > 0) return [] as SeededUser[];
+    return runSeed(supabaseAdmin);
+  },
+);
+
+type SupabaseAdminClient = typeof import("@/integrations/supabase/client.server")["supabaseAdmin"];
+
+async function runSeed(supabaseAdmin: SupabaseAdminClient) {
 
     const out: SeededUser[] = [];
     for (const acc of TEST_ACCOUNTS) {
@@ -162,7 +186,7 @@ export const seedTestAccounts = createServerFn({ method: "POST" })
       });
     }
     return out;
-  });
+}
 
 export type AppUserRow = {
   id: string;

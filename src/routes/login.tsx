@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { login } from "@/lib/store";
+import { useServerFn } from "@tanstack/react-start";
+import { bootstrapTestAccounts } from "@/lib/test-accounts.functions";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -19,6 +21,13 @@ function LoginPage() {
   const [erro, setErro] = useState<string | null>(null);
   const [mostrar, setMostrar] = useState(false);
   const [enviando, setEnviando] = useState(false);
+
+  // Bootstrap silencioso: garante que as contas de teste existam antes
+  // do primeiro login. Só age quando ainda não há nenhum admin.
+  const bootstrapFn = useServerFn(bootstrapTestAccounts);
+  useEffect(() => {
+    bootstrapFn().catch(() => {});
+  }, [bootstrapFn]);
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault();
