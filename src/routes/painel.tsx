@@ -1,7 +1,8 @@
 import { createFileRoute, Link, Outlet, useNavigate, useRouterState } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Home, ShieldCheck, ClipboardList, Users, UserRound } from "lucide-react";
-import { useStore } from "@/lib/store";
+import { setSessionFromAuth, useStore, type Session } from "@/lib/store";
+import { supabase } from "@/integrations/supabase/client";
 
 export const Route = createFileRoute("/painel")({
   head: () => ({
@@ -23,14 +24,53 @@ function PainelLayout() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
   const session = useStore((s) => s.session);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
-    if (!session || (session.kind !== "catequista" && session.kind !== "admin")) {
-      navigate({ to: "/login" });
+    let cancelled = false;
+    if (session?.kind === "catequista" || session?.kind === "admin") {
+      setCheckingAuth(false);
+      return;
     }
+
+    (async () => {
+      const { data } = await supabase.auth.getUser();
+      const user = data.user;
+      if (cancelled) return;
+      if (!user) {
+        setCheckingAuth(false);
+        navigate({ to: "/login" });
+        return;
+      }
+
+      const { data: rolesData } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+      if (cancelled) return;
+      const roles = (rolesData ?? []).map((r) => r.role as "admin" | "catequista" | "aluno");
+      const nextSession: Session = roles.includes("admin")
+        ? {
+            kind: "admin",
+            id: user.id,
+            nome: (user.user_metadata?.nome as string | undefined) ?? user.email ?? undefined,
+            email: user.email ?? undefined,
+          }
+        : roles.includes("catequista")
+        ? { kind: "catequista", id: user.id }
+        : { kind: "aluno", id: user.id };
+
+      setSessionFromAuth(nextSession);
+      setCheckingAuth(false);
+      if (nextSession.kind !== "catequista" && nextSession.kind !== "admin") {
+        navigate({ to: "/login" });
+      }
+    })();
+
+    return () => { cancelled = true; };
   }, [session, navigate]);
 
-  if (!session || (session.kind !== "catequista" && session.kind !== "admin")) return null;
+  if (checkingAuth || !session || (session.kind !== "catequista" && session.kind !== "admin")) return null;
 
   const isAdmin = session.kind === "admin";
   const TABS: Tab[] = isAdmin
