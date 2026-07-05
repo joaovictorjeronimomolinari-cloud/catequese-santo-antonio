@@ -133,11 +133,9 @@ export const bootstrapTestAccounts = createServerFn({ method: "POST" }).handler(
   },
 );
 
-async function runSeed(
-  supabaseAdmin: Awaited<
-    typeof import("@/integrations/supabase/client.server")
-  >["supabaseAdmin"],
-) {
+type SupabaseAdminClient = typeof import("@/integrations/supabase/client.server")["supabaseAdmin"];
+
+async function runSeed(supabaseAdmin: SupabaseAdminClient) {
 
     const out: SeededUser[] = [];
     for (const acc of TEST_ACCOUNTS) {
