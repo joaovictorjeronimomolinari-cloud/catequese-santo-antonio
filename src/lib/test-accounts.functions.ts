@@ -69,15 +69,16 @@ export type SeededUser = {
 
 type SupabaseUser = { id: string; email?: string | null; user_metadata?: Record<string, unknown> };
 
-async function assertAdmin(context: { supabase: unknown; userId: string }) {
-  const supabase = context.supabase as {
-    rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown; error: unknown }>;
-  };
-  const { data, error } = await supabase.rpc("has_role", {
-    _user_id: context.userId,
-    _role: "admin",
-  });
-  if (error || data !== true) {
+async function assertAdmin(context: { userId: string }) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data, error } = await supabaseAdmin
+    .from("user_roles")
+    .select("role")
+    .eq("user_id", context.userId)
+    .eq("role", "admin")
+    .maybeSingle();
+
+  if (error || !data) {
     throw new Error("Forbidden");
   }
 }
@@ -149,7 +150,7 @@ async function runSeed(supabaseAdmin: SupabaseAdminClient) {
           user_metadata: { nome: acc.nome, kind: acc.kind },
         });
         if (error || !data.user) {
-          throw new Error(`Falha ao criar ${acc.email}: ${error?.message ?? "desconhecido"}`);
+          throw new Error(`Falha ao criar ${acc.email}: ${String(error?.message ?? error ?? "desconhecido")}`);
         }
         user = data.user as SupabaseUser;
         created = true;
