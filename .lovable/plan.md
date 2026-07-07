@@ -1,67 +1,79 @@
-# Migração de autenticação para Lovable Cloud
+# Roadmap de aprimoramento — Catequizando Digital
 
-Os três findings (`admin_creds_bundle`, `plaintext_passwords_localstorage`, `localstorage_session_bypass`) têm a mesma causa: hoje o app inteiro roda em cima de `localStorage` com senhas em texto puro. A única correção real é mover contas, senhas e sessão para um servidor. Este plano faz essa migração de forma faseada, mantendo o app utilizável entre as fases.
+Foco: **Área do Catequizando** + **Conteúdo/Atividades**, para as duas faixas (Crianças 1ª Comunhão e Jovens Crisma). Estética atual preservada — paleta franciscana (habit/gold/lily/leaf/sky), tipografia Fraunces + Nunito, botões "chunky" com shadow-pop. Adições permitidas: micro-animações + modo escuro.
 
-## Consequências que você precisa aceitar antes
+---
 
-- **Todos os cadastros atuais serão perdidos.** Alunos, catequistas e admins precisam se recadastrar com senha nova — não há como importar senhas em texto puro para o Auth em segurança.
-- **As senhas de admin `adm182` e `paroquia2026` deixam de existir.** Você (João Victor) e o Padre criam contas novas de admin com senhas próprias, e essas senhas nunca mais entram no código.
-- **Recadastro passa pela mesma fila de aprovação atual** — nada muda no processo pedagógico.
-- **Progresso, devocional e conquistas dos alunos existentes serão zerados** (moram no mesmo `localStorage` das senhas). Só faz sentido migrar para o Cloud num momento em que perder esse histórico seja aceitável.
+## Fase 1 — Polimento e vida (base estética, sem quebrar nada)
 
-Se algum desses pontos for inaceitável, me diz antes de aprovar e eu ajusto o plano (ex.: manter progresso local por enquanto e migrar só auth).
+**Objetivo:** deixar o app "vivo" mantendo o visual atual.
 
-## Fases
+1. **Micro-animações consistentes** (via utilitários Tailwind já presentes: `animate-fade-in`, `hover-scale`, `scale-in`).
+   - Entrada suave em cards de trilha, medalhas, orações e devocionais.
+   - Feedback tátil ao completar atividade: pulo do XP, chuva de lírios, medalha "estourando" (scale-in + shadow-gold-glow).
+   - Botão de resposta correta/incorreta com animação sutil (verde leaf / cocoa habit-deep).
+2. **Feedback sonoro opcional** (toggle no Perfil):
+   - 3 SFX curtos: acerto, conquista, transição de etapa. Silencioso por padrão.
+3. **Modo escuro** (o token `.dark` já existe em `styles.css`):
+   - Toggle no Perfil do aluno e do catequista, persistido em `localStorage`.
+   - Ajustar contrastes de cards `bg-lily` e textos `text-habit-deep` que somem no dark.
+4. **Skeleton loaders** nas telas de trilha e conquistas para evitar "flash" na hidratação.
 
-### Fase 1 — Fundações (Cloud + schema + auth)
-1. Ativar Lovable Cloud.
-2. Criar migração com:
-   - Enum `app_role` (`admin`, `catequista`, `aluno`) + tabela `user_roles` + função `has_role` (SECURITY DEFINER, `search_path=public`).
-   - Tabela `profiles` (1↔1 com `auth.users`) com dados comuns: nome, telefone, avatar.
-   - Tabela `alunos_perfil` (idade, etapa: pré‑catequese / 1ª eucaristia / crisma, `catequista_id`, `status`: pendente/ativo/recusado, dados de matrícula).
-   - Tabela `catequistas_perfil` (etapas atendidas, `status`).
-   - Trigger `on_auth_user_created` que popula `profiles`.
-   - `GRANT`s explícitos + RLS em todas as tabelas.
-3. Trocar rotas de login/matrícula/criação de catequista para usar `supabase.auth.signUp` / `signInWithPassword` (senha nunca sai do formulário para o cliente logado).
-4. Substituir a "sessão" do `localStorage` por `supabase.auth.getUser()` + `onAuthStateChange` no `__root.tsx`.
-5. Substituir os `useEffect` que checam papel por gate real: rotas admin sob `_authenticated/` + verificação server‑side via `has_role` no `beforeLoad`/loader.
-6. Remover do bundle: array `ADMINS` de `store.ts`, campo `senha` de qualquer tipo TS, qualquer leitura/escrita de senha no `localStorage`.
+## Fase 2 — Trilha do Catequizando (rota `/aluno`)
 
-Ao final da Fase 1 os três findings já estão fechados. O app fica temporariamente com um único fluxo de auth funcionando.
+**Objetivo:** transformar a trilha numa jornada narrativa clara.
 
-### Fase 2 — Aprovações e turma no servidor
-7. Mover fluxo de matrícula pendente e aprovação para o banco (RLS: admin vê tudo, aluno vê o próprio status, catequista vê os alunos vinculados).
-8. Mover "mover aluno de turma" para RPC protegida por `has_role('admin')`.
+1. **Mapa da jornada visual**: substituir a lista por uma trilha vertical em zigue-zague (estilo Duolingo), com marcos por capítulo (Batismo → Palavra → Eucaristia → Missão / Crisma: Espírito Santo → Dons → Frutos → Envio).
+2. **Estados dos nós**: bloqueado (Lock cinza), disponível (gold-glow pulsante), concluído (medalha leaf).
+3. **Cabeçalho "companheiro de fé"**: Frei Antônio (crianças) / Santo padroeiro escolhido (jovens) com balão de fala contextual ao progresso.
+4. **Streak e XP**: barra fixa no topo, animada ao ganhar pontos.
+5. **Baú do Frei Antônio** (já referenciado em conquistas): abrir a cada 5 atividades — mini-modal com scale-in revelando lírios/XP bônus.
 
-### Fase 3 — Dados pedagógicos (progresso, devocional, conquistas)
-9. Tabelas `progresso_no`, `devocional_registro`, `conquistas` com RLS por `auth.uid()`.
-10. Reescrever leitura/escrita nessas áreas do `store.ts` como server functions.
-11. Aposentar `cd:state:v2` do `localStorage` e o `src/lib/store.ts` como fonte de verdade — vira só cache de UI.
+## Fase 3 — Devocional / Orações (rota `/aluno/devocional`)
 
-### Fase 4 — Limpeza
-12. Rodar security scan e marcar os três findings como corrigidos.
-13. Atualizar `security-memory` descrevendo o novo modelo (Supabase Auth + RLS + `has_role`), o que é público (nada) e o que é intencional.
-14. Documentar no README interno como criar novos admins (via painel do Supabase, não código).
+**Objetivo:** conteúdo diário útil, diferenciando faixas.
 
-## Detalhes técnicos
+1. **Santo do dia + citação bíblica** carregados de uma tabela de conteúdo curado (`src/lib/santos.ts` já existe — expandir para 30+ santos franciscanos e do calendário).
+2. **Crianças**: cartões ilustrados com oração curta (Pai-Nosso, Ave-Maria, Anjo da Guarda), botão "rezei hoje" que incrementa streak.
+3. **Jovens**: devocional em 3 blocos — *Palavra* (versículo), *Reflexão* (2–3 parágrafos), *Compromisso do dia* (ação prática). Marcador de leitura.
+4. **Terço interativo** (bônus, opcional): 5 dezenas com progresso visual em contas douradas.
 
-- Auth: email + senha (Supabase Auth). Sem OAuth por enquanto — pode ser adicionado depois sem quebrar nada.
-- Papéis: `user_roles` separada, nunca em `profiles`. Todas as checagens via `public.has_role(auth.uid(), 'admin')`.
-- Server functions autenticadas via `createServerFn` + `requireSupabaseAuth`. Operações privilegiadas (aprovar aluno, mover turma, promover admin) checam `has_role` no handler antes de agir.
-- Nada de `supabaseAdmin` fora de operações de manutenção. Nunca importado no topo de arquivos `.functions.ts`.
-- `src/start.ts`: anexar `attachSupabaseAuth` ao `functionMiddleware` existente.
-- Rotas protegidas migram para `src/routes/_authenticated/`. Rotas hoje em `/painel/*` e `/aprovacoes` viram `/_authenticated/painel/*` e `/_authenticated/aprovacoes` com gate adicional de `has_role('admin' | 'catequista')` no `beforeLoad`.
-- `src/routes/index.tsx`, `/matricula`, `/catequista`, `/login`, `/conheca` continuam públicas.
-- Removidas do código: constantes `ADMINS`, tipos `senha: string`, `Session` local do `store.ts`, listeners que gravam sessão no `localStorage`.
+## Fase 4 — Conquistas ampliadas (rota `/aluno/conquistas`)
 
-## Escopo fora deste plano
+1. Novo conjunto de medalhas por conteúdo real (não só XP): "Leitor da Palavra", "Amigo dos pobres" (referência franciscana), "Semeador de paz", "Discípulo de Cristo".
+2. **Estampa/álbum**: layout de figurinhas colecionáveis com verso (descrição + versículo).
+3. **Certificado imprimível** ao concluir a etapa (PDF gerado no cliente com nome, comunidade, data).
 
-- Não vou tocar em nenhuma outra rota estética/pedagógica (Crisma, devocional, atividades infantis) exceto para trocar como leem/gravam dados.
-- Não vou implementar recuperação de senha nesta rodada (pode ser um passo curto depois — precisa da tela `/reset-password`).
-- Nada além dos três findings citados é corrigido ou ignorado.
+## Fase 5 — Biblioteca de atividades pedagógicas
 
-## O que preciso de você para começar
+**Objetivo:** aumentar o acervo em `InteractiveActivity.tsx` / `atividades-infantis.ts`.
 
-1. **OK ativar Lovable Cloud?**
-2. **OK perder cadastros e progresso atuais** (Fases 1–3)? Se quiser preservar progresso, posso adiar a Fase 3 e manter progresso local por enquanto — só auth e aprovações migram, e os três findings ainda ficam fechados.
-3. **Quais os e-mails** que devem virar admin inicial (você e o Padre)? Vou criar as contas via painel e você define as senhas na primeira entrada por "esqueci minha senha", ou você me passa as senhas que quer setar agora via `secrets` — nunca no chat.
+1. **Novos tipos de atividade**:
+   - *Ligue os pontos* (sacramento ↔ símbolo).
+   - *Complete o versículo* (arrastar palavras).
+   - *Quiz com áudio* (jovens) — pequenas homilias/versículos gravados.
+   - *Colorir digital* (crianças) — SVG com áreas clicáveis.
+2. **Progressão adaptativa**: dificuldade sobe conforme acertos; erros geram atividade de reforço.
+3. **Catálogo mínimo alvo**: 12 atividades por capítulo × 4 capítulos por etapa = 48 por faixa.
+
+---
+
+## Detalhes técnicos (para você conferir)
+
+- **Modo escuro**: usar `class="dark"` no `<html>` via hook `useTheme` novo em `src/hooks/`; persistir com `localStorage` lido em `useEffect` (evitar mismatch SSR — regra do template).
+- **Áudio**: `Howler.js` ou `<audio>` nativo; assets em `src/assets/sfx/`.
+- **Conteúdo curado**: manter em arquivos TS versionados (`src/lib/santos.ts`, novo `src/lib/devocional.ts`, `src/lib/atividades-*.ts`) — sem depender do backend para leitura pública.
+- **Backend (Lovable Cloud)**: só para registrar progresso/streak quando o usuário está logado (já há store local — evoluir para sync opcional).
+- **Sem quebrar rotas atuais**: cada fase é aditiva; testes visuais em `/aluno`, `/aluno/devocional`, `/aluno/conquistas` a cada fase.
+
+## Ordem sugerida de entrega
+
+```text
+Fase 1  → 1 rodada  (micro-anim + dark mode + SFX toggle)
+Fase 2  → 1 rodada  (mapa da trilha em zigue-zague)
+Fase 3  → 1 rodada  (devocional/orações por faixa + santo do dia)
+Fase 4  → 1 rodada  (medalhas novas + certificado)
+Fase 5  → 2 rodadas (novos tipos de atividade + expansão do acervo)
+```
+
+Se aprovar, começo pela **Fase 1** por ser a que dá "sensação de novo" imediata sem risco. Posso também pular direto para outra fase se você preferir.

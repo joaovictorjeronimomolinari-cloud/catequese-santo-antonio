@@ -1,6 +1,7 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Flame, Star, Sparkles, UserRound, type LucideIcon } from "lucide-react";
 import { comunidadeNome, faixaDe, logout, useStore } from "@/lib/store";
+import { PreferenciasCard } from "@/components/PreferenciasCard";
 
 export const Route = createFileRoute("/aluno/perfil")({
   head: () => ({ meta: [{ title: "Perfil — Catequizando Digital" }] }),
@@ -77,6 +78,10 @@ function PerfilPage() {
           <Linha k="Comunidade" v={comunidadeNome(aluno.comunidade)} />
         </div>
       </section>
+
+      <div className="mt-6">
+        <PreferenciasCard />
+      </div>
 
       <section className="mt-6 grid gap-3">
         <button

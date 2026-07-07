@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { getCurrentAdmin, logout, useStore } from "@/lib/store";
+import { PreferenciasCard } from "@/components/PreferenciasCard";
 
 export const Route = createFileRoute("/painel/perfil")({
   head: () => ({ meta: [{ title: "Perfil do Catequista — Catequizando Digital" }] }),
@@ -54,6 +55,10 @@ function PerfilPage() {
           </div>
         </section>
       )}
+
+      <div className="mt-6">
+        <PreferenciasCard />
+      </div>
 
       <section className="mt-6 grid gap-3">
         <button

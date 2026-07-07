@@ -78,7 +78,7 @@ function ConquistasPage() {
             const v = m.alcancado(p);
             const ganha = v >= m.meta;
             return (
-              <li key={m.id}>
+              <li key={m.id} className="animate-fade-in">
                 <Medalha m={m} valor={v} ganha={ganha} />
               </li>
             );
