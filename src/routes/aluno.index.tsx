@@ -36,6 +36,7 @@ import {
   type InfantilUnidade,
 } from "@/lib/atividades-infantis";
 import { InteractiveActivity } from "@/components/atividades/InteractiveActivity";
+import { playSfx } from "@/lib/preferences";
 
 export const Route = createFileRoute("/aluno/")({
   head: () => ({
@@ -256,6 +257,7 @@ function AtividadesPage() {
     if (!aluno) return;
     if (statusOf(node.id) !== "atual") return;
     completarNode(aluno.id, node.id, node.xp, node.kind === "bau" ? 3 : 1);
+    playSfx(node.kind === "bau" ? "achievement" : "success");
     setOpenNodeId(null);
   }
 
