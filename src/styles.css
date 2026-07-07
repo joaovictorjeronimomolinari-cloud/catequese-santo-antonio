@@ -131,23 +131,46 @@
 }
 
 .dark {
+  /* Tokens do template */
   --background: oklch(0.20 0.04 55);
   --foreground: oklch(0.96 0.015 85);
-  --card: oklch(0.24 0.05 55);
+  --card: oklch(0.26 0.035 55);
   --card-foreground: oklch(0.96 0.015 85);
-  --popover: oklch(0.24 0.05 55);
+  --popover: oklch(0.26 0.035 55);
   --popover-foreground: oklch(0.96 0.015 85);
+
+  /* Paleta Santo Antônio no escuro
+     — invertemos a hierarquia: --lily vira uma superfície escura,
+       --habit-deep vira texto claro. Gradientes reajustados. */
+  --cream: oklch(0.20 0.03 55);
+  --lily: oklch(0.26 0.035 55);
+  --habit: oklch(0.82 0.05 75);
+  --habit-deep: oklch(0.96 0.015 85);
+  --cord: oklch(0.55 0.06 75);
+  --gold: oklch(0.80 0.14 82);
+  --gold-soft: oklch(0.88 0.10 88);
+  --leaf: oklch(0.72 0.13 148);
+  --sky: oklch(0.32 0.05 235);
+  --sky-deep: oklch(0.62 0.12 235);
+  --ink: oklch(0.96 0.015 85);
+
+  --gradient-sky: radial-gradient(ellipse at top, oklch(0.30 0.06 235 / 0.45), transparent 65%),
+                  linear-gradient(180deg, var(--cream) 0%, oklch(0.24 0.04 55) 100%);
+  --gradient-habit: linear-gradient(135deg, oklch(0.34 0.05 50), oklch(0.44 0.06 55));
+  --gradient-gold: linear-gradient(135deg, oklch(0.74 0.14 88), oklch(0.62 0.13 78));
+  --gradient-leaf: linear-gradient(135deg, oklch(0.62 0.13 148), oklch(0.52 0.12 148));
+
   --primary: var(--gold);
   --primary-foreground: oklch(0.20 0.04 55);
   --secondary: oklch(0.30 0.05 55);
   --secondary-foreground: oklch(0.96 0.015 85);
   --muted: oklch(0.28 0.04 55);
-  --muted-foreground: oklch(0.704 0.04 256.788);
+  --muted-foreground: oklch(0.78 0.02 80);
   --accent: var(--gold);
   --accent-foreground: oklch(0.20 0.04 55);
   --destructive: oklch(0.704 0.191 22.216);
   --destructive-foreground: oklch(0.984 0.003 247.858);
-  --border: oklch(1 0 0 / 10%);
+  --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.551 0.027 264.364);
   --chart-1: oklch(0.488 0.243 264.376);
