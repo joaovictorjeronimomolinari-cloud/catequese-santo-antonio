@@ -396,7 +396,7 @@ function UnidadeBlock({
 
   return (
     <div className={isFirst ? "" : "mt-12"}>
-      <div className={"relative overflow-hidden rounded-3xl border-[3px] border-[color:var(--habit-deep)] p-5 shadow-pop " + banner}>
+      <div className={"relative overflow-hidden rounded-3xl border-[3px] border-[color:var(--habit-deep)] p-5 shadow-pop animate-fade-in " + banner}>
         <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/20 blur-2xl" aria-hidden />
         <p className="text-[10px] font-black uppercase tracking-[0.28em] opacity-80">
           Unidade {unidade.numero}
