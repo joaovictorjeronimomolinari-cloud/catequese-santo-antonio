@@ -9,6 +9,7 @@ export const Route = createFileRoute("/painel")({
     meta: [
       { title: "Painel do Catequista — Catequizando Digital" },
       { name: "description", content: "Acompanhe sua turma, atividades e formação no painel do catequista." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: PainelLayout,

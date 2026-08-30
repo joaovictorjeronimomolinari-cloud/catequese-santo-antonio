@@ -13,7 +13,7 @@ import {
 } from "@/lib/store";
 
 export const Route = createFileRoute("/painel/atividades")({
-  head: () => ({ meta: [{ title: "Atividades — Painel do Catequista" }] }),
+  head: () => ({ meta: [{ title: "Atividades — Painel do Catequista" }, { name: "description", content: "Libere atividades da trilha para a turma e defina prazos de conclusão." }, { name: "robots", content: "noindex, nofollow" }] }),
   component: AtividadesPage,
 });
 

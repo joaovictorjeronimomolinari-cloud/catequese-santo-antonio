@@ -26,7 +26,9 @@ export const Route = createFileRoute("/matricula")({
         content:
           "Cinco passos rápidos para garantir a vaga do seu pequeno na catequese de Santo Antônio.",
       },
+      { property: "og:url", content: "https://catequese-santo-antonio.lovable.app/matricula" },
     ],
+    links: [{ rel: "canonical", href: "https://catequese-santo-antonio.lovable.app/matricula" }],
   }),
   component: MatriculaPage,
 });

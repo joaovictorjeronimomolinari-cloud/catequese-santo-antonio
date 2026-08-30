@@ -7,10 +7,15 @@ import { bootstrapTestAccounts } from "@/lib/test-accounts.functions";
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "Entrar — Catequizando Digital" },
-      { name: "description", content: "Acesse sua conta de catequizando ou catequista da Paróquia Santo Antônio." },
+      { title: "Entrar na conta — Catequizando Digital" },
+      { name: "description", content: "Acesse sua conta de catequizando ou catequista da Paróquia Santo Antônio de Jacutinga com e-mail ou nome de usuário." },
+      { property: "og:title", content: "Entrar na conta do Catequizando Digital" },
+      { property: "og:description", content: "Login de catequizandos e catequistas da Paróquia Santo Antônio de Jacutinga." },
+      { property: "og:url", content: "https://catequese-santo-antonio.lovable.app/login" },
     ],
+    links: [{ rel: "canonical", href: "https://catequese-santo-antonio.lovable.app/login" }],
   }),
+
   component: LoginPage,
 });
 

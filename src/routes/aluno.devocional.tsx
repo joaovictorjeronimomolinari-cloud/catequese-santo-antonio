@@ -22,7 +22,7 @@ import { Sparkles, BookHeart, RefreshCw, Check, X } from "lucide-react";
 
 export const Route = createFileRoute("/aluno/devocional")({
   head: () => ({
-    meta: [{ title: "Devocional — Catequizando Digital" }],
+    meta: [{ title: "Devocional e santos — Catequizando Digital" }, { name: "description", content: "Orações, reflexões diárias e a comunhão dos santos para o catequizando." }, { name: "robots", content: "noindex, nofollow" }],
   }),
   component: DevocionalPage,
 });

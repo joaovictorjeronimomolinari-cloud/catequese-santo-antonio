@@ -25,7 +25,9 @@ export const Route = createFileRoute("/catequista")({
         content:
           "Conta de catequista no Catequizando Digital: gerencie sua turma e acompanhe o caminho dos seus catequizandos.",
       },
+      { property: "og:url", content: "https://catequese-santo-antonio.lovable.app/catequista" },
     ],
+    links: [{ rel: "canonical", href: "https://catequese-santo-antonio.lovable.app/catequista" }],
   }),
   component: CatequistaPage,
 });

@@ -30,7 +30,9 @@ export const Route = createFileRoute("/conheca")({
         property: "og:description",
         content: "Tour pelas atividades, devocional e proposta pedagógica do app da Paróquia Santo Antônio.",
       },
+      { property: "og:url", content: "https://catequese-santo-antonio.lovable.app/conheca" },
     ],
+    links: [{ rel: "canonical", href: "https://catequese-santo-antonio.lovable.app/conheca" }],
   }),
   component: ConhecaPage,
 });

@@ -25,8 +25,15 @@ import {
 
 export const Route = createFileRoute("/aprovacoes")({
   head: () => ({
-    meta: [{ title: "Aprovações — Catequizando Digital" }],
+    meta: [
+      { title: "Aprovações de matrículas — Catequizando Digital" },
+      { name: "description", content: "Painel da coordenação para aprovar ou recusar matrículas de catequizandos e contas de catequistas." },
+      { property: "og:title", content: "Aprovações de matrículas" },
+      { property: "og:description", content: "Área restrita da coordenação da catequese da Paróquia Santo Antônio." },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
   }),
+
   component: AprovacoesPage,
 });
 

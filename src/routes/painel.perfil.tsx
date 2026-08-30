@@ -3,7 +3,7 @@ import { getCurrentAdmin, logout, useStore } from "@/lib/store";
 import { PreferenciasCard } from "@/components/PreferenciasCard";
 
 export const Route = createFileRoute("/painel/perfil")({
-  head: () => ({ meta: [{ title: "Perfil do Catequista — Catequizando Digital" }] }),
+  head: () => ({ meta: [{ title: "Perfil do Catequista — Catequizando Digital" }, { name: "description", content: "Dados da conta do catequista, preferências do app e encerramento de sessão." }, { name: "robots", content: "noindex, nofollow" }] }),
   component: PerfilPage,
 });
 

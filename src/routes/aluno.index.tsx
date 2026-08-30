@@ -41,7 +41,8 @@ import { playSfx } from "@/lib/preferences";
 export const Route = createFileRoute("/aluno/")({
   head: () => ({
     meta: [
-      { title: "Atividades — Catequizando Digital" },
+      { title: "Trilha de atividades — Catequizando Digital" },
+      { name: "robots", content: "noindex, nofollow" },
       { name: "description", content: "Trilha real de atividades, missões e conquistas da catequese de Santo Antônio." },
     ],
   }),
