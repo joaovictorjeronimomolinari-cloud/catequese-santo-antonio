@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /aluno
+Disallow: /painel
+Disallow: /aprovacoes
+
+Sitemap: https://catequese-santo-antonio.lovable.app/sitemap.xml
