@@ -4,7 +4,23 @@ import { ArrowRightLeft, X, Check } from "lucide-react";
 import { comunidadeNome, moverAluno, useStore, type Aluno, type Catequista } from "@/lib/store";
 
 export const Route = createFileRoute("/painel/turma")({
-  head: () => ({ meta: [{ title: "Turma — Painel do Catequista" }] }),
+  head: () => ({
+    meta: [
+      { title: "Turma — Painel do Catequista" },
+      {
+        name: "description",
+        content:
+          "Gestão da turma de catequese: visualize os catequizandos aprovados, acompanhe a comunidade e mova alunos entre turmas.",
+      },
+      { property: "og:title", content: "Turma — Painel do Catequista" },
+      {
+        property: "og:description",
+        content:
+          "Gestão da turma de catequese: visualize os catequizandos aprovados, acompanhe a comunidade e mova alunos entre turmas.",
+      },
+      { name: "robots", content: "noindex, nofollow" },
+    ],
+  }),
   component: TurmaPage,
 });
 
