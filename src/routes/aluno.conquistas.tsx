@@ -14,7 +14,7 @@ import {
 import { useStore } from "@/lib/store";
 
 export const Route = createFileRoute("/aluno/conquistas")({
-  head: () => ({ meta: [{ title: "Conquistas — Catequizando Digital" }] }),
+  head: () => ({ meta: [{ title: "Minhas conquistas — Catequizando Digital" }, { name: "description", content: "Medalhas, sequência de atividades e XP conquistados na catequese." }, { name: "robots", content: "noindex, nofollow" }] }),
   component: ConquistasPage,
 });
 

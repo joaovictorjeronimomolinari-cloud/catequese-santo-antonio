@@ -11,7 +11,7 @@ import {
 import { useServerFn } from "@tanstack/react-start";
 
 export const Route = createFileRoute("/painel/")({
-  head: () => ({ meta: [{ title: "Início — Painel do Catequista" }] }),
+  head: () => ({ meta: [{ title: "Início — Painel do Catequista" }, { name: "description", content: "Resumo da turma, encontros e progresso dos catequizandos do catequista." }, { name: "robots", content: "noindex, nofollow" }] }),
   component: PainelHome,
 });
 

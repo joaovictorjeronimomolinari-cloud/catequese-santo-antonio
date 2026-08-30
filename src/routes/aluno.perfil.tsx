@@ -4,7 +4,7 @@ import { comunidadeNome, faixaDe, logout, useStore } from "@/lib/store";
 import { PreferenciasCard } from "@/components/PreferenciasCard";
 
 export const Route = createFileRoute("/aluno/perfil")({
-  head: () => ({ meta: [{ title: "Perfil — Catequizando Digital" }] }),
+  head: () => ({ meta: [{ title: "Meu perfil de catequizando — Catequizando Digital" }, { name: "description", content: "Dados do catequizando, progresso acumulado e preferências do aplicativo." }, { name: "robots", content: "noindex, nofollow" }] }),
   component: PerfilPage,
 });
 

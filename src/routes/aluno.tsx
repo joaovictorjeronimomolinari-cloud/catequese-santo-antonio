@@ -8,6 +8,7 @@ export const Route = createFileRoute("/aluno")({
     meta: [
       { title: "Área do Catequizando — Catequizando Digital" },
       { name: "description", content: "Trilha de atividades, devocional, conquistas e perfil do catequizando." },
+      { name: "robots", content: "noindex, nofollow" },
     ],
   }),
   component: AlunoLayout,
