@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as PainelRouteImport } from './routes/painel'
 import { Route as MatriculaRouteImport } from './routes/matricula'
 import { Route as LoginRouteImport } from './routes/login'
@@ -26,6 +27,11 @@ import { Route as AlunoPerfilRouteImport } from './routes/aluno.perfil'
 import { Route as AlunoDevocionalRouteImport } from './routes/aluno.devocional'
 import { Route as AlunoConquistasRouteImport } from './routes/aluno.conquistas'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PainelRoute = PainelRouteImport.update({
   id: '/painel',
   path: '/painel',
@@ -116,6 +122,7 @@ export interface FileRoutesByFullPath {
   '/login': typeof LoginRoute
   '/matricula': typeof MatriculaRoute
   '/painel': typeof PainelRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/aluno/conquistas': typeof AlunoConquistasRoute
   '/aluno/devocional': typeof AlunoDevocionalRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -132,6 +139,7 @@ export interface FileRoutesByTo {
   '/conheca': typeof ConhecaRoute
   '/login': typeof LoginRoute
   '/matricula': typeof MatriculaRoute
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/aluno/conquistas': typeof AlunoConquistasRoute
   '/aluno/devocional': typeof AlunoDevocionalRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -151,6 +159,7 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/matricula': typeof MatriculaRoute
   '/painel': typeof PainelRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/aluno/conquistas': typeof AlunoConquistasRoute
   '/aluno/devocional': typeof AlunoDevocionalRoute
   '/aluno/perfil': typeof AlunoPerfilRoute
@@ -171,6 +180,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/matricula'
     | '/painel'
+    | '/sitemap.xml'
     | '/aluno/conquistas'
     | '/aluno/devocional'
     | '/aluno/perfil'
@@ -187,6 +197,7 @@ export interface FileRouteTypes {
     | '/conheca'
     | '/login'
     | '/matricula'
+    | '/sitemap.xml'
     | '/aluno/conquistas'
     | '/aluno/devocional'
     | '/aluno/perfil'
@@ -205,6 +216,7 @@ export interface FileRouteTypes {
     | '/login'
     | '/matricula'
     | '/painel'
+    | '/sitemap.xml'
     | '/aluno/conquistas'
     | '/aluno/devocional'
     | '/aluno/perfil'
@@ -224,10 +236,18 @@ export interface RootRouteChildren {
   LoginRoute: typeof LoginRoute
   MatriculaRoute: typeof MatriculaRoute
   PainelRoute: typeof PainelRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/painel': {
       id: '/painel'
       path: '/painel'
@@ -385,6 +405,7 @@ const rootRouteChildren: RootRouteChildren = {
   LoginRoute: LoginRoute,
   MatriculaRoute: MatriculaRoute,
   PainelRoute: PainelRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -7,12 +7,15 @@ import brasao from "@/assets/brasao-paroquia.jpg";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Catequizando Digital — Paróquia Santo Antônio · Jacutinga/MG" },
-      { name: "description", content: "Bem-vindo ao Catequizando Digital, o aplicativo de catequese da Paróquia Santo Antônio de Jacutinga. Faça sua matrícula ou conheça nosso aplicativo." },
-      { property: "og:title", content: "Catequizando Digital" },
-      { property: "og:description", content: "A fé no cotidiano das famílias. Catequese da Paróquia Santo Antônio." },
+      { title: "Catequese em Jacutinga/MG — Matrícula Online | Paróquia Santo Antônio" },
+      { name: "description", content: "Matricule seu filho na catequese da Paróquia Santo Antônio de Jacutinga: pré-catequese, Primeira Comunhão e Crisma, com atividades e devocional no app." },
+      { property: "og:title", content: "Catequese em Jacutinga/MG — Matrícula Online" },
+      { property: "og:description", content: "Pré-catequese, Primeira Comunhão e Crisma na Paróquia Santo Antônio: matrícula online e trilha de atividades no app." },
+      { property: "og:url", content: "https://catequese-santo-antonio.lovable.app/" },
     ],
+    links: [{ rel: "canonical", href: "https://catequese-santo-antonio.lovable.app/" }],
   }),
+
   component: Index,
 });
 
